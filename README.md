@@ -1,5 +1,8 @@
 # アプリ概要
 
+※こちらはバックエンド（API）のリポジトリです。
+フロントエンドのみのリポジトリはこちら。
+
 オリジナルアプリ「Tatoeba」。
 わかりにくい話をわかりやすく例える、「例え話を支援する」アプリです。
 
@@ -12,7 +15,6 @@ CRUD処理/検索/タグによるソート機能/eメールによるメール認
 ### 言語とツール等
 
 Next.js/React/TypeScript/Tailwind CSS/Mantine/REST API(Open API)/Stoplight Studio/PlanetScale
-
 ### ライブラリ等
 
 Recoil/next-router/next-link
