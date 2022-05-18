@@ -1,11 +1,15 @@
 # アプリ概要
 
-※こちらはバックエンド（API）のリポジトリです。
-フロントエンドのみのリポジトリはこちら。　
-https://github.com/london-newyork/original-app-tatoeba
 
 オリジナルアプリ「Tatoeba」。
 わかりにくい話をわかりやすく例える、「例え話を支援する」アプリです。
+
+※こちらはバックエンド（API）のリポジトリです。
+
+フロントエンドのみのリポジトリはこちら。　
+
+https://github.com/london-newyork/original-app-tatoeba
+
 
 ### このアプリでの機能および主なやったこと
 
