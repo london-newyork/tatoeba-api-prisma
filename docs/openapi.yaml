@@ -218,8 +218,8 @@ paths:
       summary: ''
       operationId: post-login
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
           content:
             application/json:
               schema:
@@ -227,10 +227,13 @@ paths:
                 properties:
                   idToken:
                     type: string
+                  accessToken:
+                    type: string
                 required:
                   - idToken
-        '406':
-          description: Not Acceptable
+                  - accessToken
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
