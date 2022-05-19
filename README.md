@@ -22,23 +22,7 @@ CRUD処理/検索/タグによるソート機能/eメールによるメール認
 
 ### 言語とツール等
 
-Next.js/React/TypeScript/Tailwind CSS/Mantine/REST API(Open API)/Stoplight Studio/PlanetScale/Lambda
-### ライブラリ等
-
-Recoil/next-router/next-link
-
-- Next.js
-
-  SSR・SSG で読み込み時のダウンロードファイルサイズを削減できる。SPA で巨大な JavaScript を生成してしまう React より効率的。
-  また、URL ごとに個別の HTML が生成されるので、SEO 上良い点で採用しています。
-
-- TypeScript
-
-  型による制限で、ミスを少なくして開発を効率化するために採用しました。
-
-- TailwindCSS
-
-  TailwindCSS を使ってあらかじめ定義されたスタイルを使っていくことで、より開発期間を短縮することができるため、採用しました。
+REST API(Open API)/Stoplight Studio/PlanetScale/Lambda
 
 # 開発背景
 
