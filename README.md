@@ -11,7 +11,7 @@
 フロントエンドのみのリポジトリはこちら。
 （過去のIssueやPRなども見られます）
 
-https://github.com/london-newyork/original-app-tatoeba
+https://github.com/london-newyork/tatoeba-frontend
 
 
 ### このアプリでの機能および主なやったこと
@@ -22,7 +22,7 @@ CRUD処理/検索/タグによるソート機能/eメールによるメール認
 
 ### 言語とツール等
 
-Next.js/React/TypeScript/Tailwind CSS/Mantine/REST API(Open API)/Stoplight Studio/PlanetScale
+Next.js/React/TypeScript/Tailwind CSS/Mantine/REST API(Open API)/Stoplight Studio/PlanetScale/Lambda
 ### ライブラリ等
 
 Recoil/next-router/next-link
