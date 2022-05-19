@@ -7,7 +7,7 @@
 
 ※こちらはバックエンド（API）のリポジトリです。
 
-フロントエンドのみのリポジトリはこちら。　
+フロントエンドのみのリポジトリはこちら。　（過去のIssueやPRなども見られます）
 
 https://github.com/london-newyork/original-app-tatoeba
 
