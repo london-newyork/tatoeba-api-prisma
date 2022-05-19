@@ -213,6 +213,48 @@ paths:
                   type: string
                 password:
                   type: string
+  /login:
+    post:
+      summary: ''
+      operationId: post-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idToken:
+                    type: string
+                required:
+                  - idToken
+        '406':
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  minLength: 0
+                password:
+                  type: string
+              required:
+                - email
+                - password
+            examples:
+              example-1:
+                value:
+                  '': string
+        description: ''
+      description: ログインAPI
 components:
   schemas:
     User:
@@ -261,3 +303,5 @@ components:
       properties:
         type:
           type: string
+      examples:
+        - type: string
