@@ -22,7 +22,7 @@ CRUD処理/検索/タグによるソート機能/eメールによるメール認
 
 ### 言語とツール等
 
-REST API(Open API)/Stoplight Studio/PlanetScale/Express/Prisma/Lambda
+REST API(Open API)/Stoplight Studio/PlanetScale/Node.js/Express/Prisma/Lambda
 
 # 開発背景
 
