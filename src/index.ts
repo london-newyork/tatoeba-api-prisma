@@ -19,6 +19,7 @@ app.listen(3002, () => {
 });
 
 import mysql from 'mysql2';
+import { getMaxListeners } from 'process';
 const connection = mysql.createConnection(process.env.DATABASE_URL as string);
 
 connection.connect();
@@ -59,5 +60,13 @@ app.post('/registrations', (req, res, next) => {
 
   // ここで登録処理などを行う
 
+  connection.query(
+    'INSERT INTO users (email) VALUES ("testtest@gmail.com")',
+    function (err, rows) {
+      if (err) throw err;
+
+      res.send(rows);
+    }
+  );
   res.send({ registrationToken: req.body.email });
 });
