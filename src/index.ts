@@ -58,6 +58,7 @@ app.post('/registrations', (req, res, next) => {
     'INSERT INTO users (email) VALUES ("testtest@gmail.com")',
     function (err, rows) {
       if (err) throw err;
+      console.log(res);
 
       res.send(rows);
     }
