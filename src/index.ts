@@ -54,14 +54,13 @@ app.post('/registrations', (req, res, next) => {
 
   // ここで登録処理などを行う
 
+  const sql = 'INSERT INTO users (email,password) VALUES (? , ?)';
   connection.query(
-    'INSERT INTO users (email) VALUES ("testtest@gmail.com")',
-    function (err, rows) {
+    sql,
+    [req.body.email, req.body.password],
+    function (err, resultSetHeader) {
       if (err) throw err;
-      console.log(res);
-
-      res.send(rows);
+      res.send({ registrationToken: resultSetHeader });
     }
   );
-  res.send({ registrationToken: req.body.email });
 });
