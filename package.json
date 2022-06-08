@@ -29,8 +29,10 @@
   "dependencies": {
     "@types/express": "^4.17.13",
     "@types/mysql": "^2.15.21",
+    "@types/uuid": "^8.3.4",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "uuid": "^8.3.2"
   }
 }
