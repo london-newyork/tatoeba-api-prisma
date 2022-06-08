@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 require('dotenv').config();
 // import 'dotenv/config';
 import express from 'express';
@@ -53,14 +55,10 @@ app.post('/registrations', (req, res, next) => {
   console.log(req.body);
 
   // ここで登録処理などを行う
-
-  const sql = 'INSERT INTO users (email,password) VALUES (? , ?)';
-  connection.query(
-    sql,
-    [req.body.email, req.body.password],
-    function (err, resultSetHeader) {
-      if (err) throw err;
-      res.send({ registrationToken: resultSetHeader });
-    }
-  );
+  const token = uuidv4();
+  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+  connection.query(sql, [token, req.body.email], function (err) {
+    if (err) throw err;
+    res.send({ registrationToken: token });
+  });
 });
