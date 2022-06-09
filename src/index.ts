@@ -1,9 +1,7 @@
+require('dotenv').config();
 import { v4 as uuidv4 } from 'uuid';
-import sgMail from '@sendgrid/mail';
 import mysql from 'mysql2';
 import { getMaxListeners } from 'process';
-
-require('dotenv').config();
 // import 'dotenv/config';
 import express from 'express';
 import { useMailToUser } from './hooks/useMailToUser';
@@ -68,13 +66,13 @@ app.post('/registrations', (req, res, next) => {
   });
 });
 
-app.put('/registrations', (req, res, next) => {
-  // ここで登録完了処理をする
-  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
-  connection.query(sql, [token, req.body.email], function (err) {
-    if (err) throw err;
-    // if (token) {
-    //   res.send({});
-    // }
-  });
-});
+// app.put('/registrations', (req, res, next) => {
+//   // ここで登録完了処理をする
+//   const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+//   connection.query(sql, [token, req.body.email], function (err) {
+//     if (err) throw err;
+//     // if (token) {
+//     //   res.send({});
+//     // }
+//   });
+// });
