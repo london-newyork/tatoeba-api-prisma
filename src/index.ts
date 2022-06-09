@@ -4,7 +4,7 @@ import mysql from 'mysql2';
 import { getMaxListeners } from 'process';
 // import 'dotenv/config';
 import express from 'express';
-import { useMailToUser } from './hooks/useMailToUser';
+import { sendRegistrationAuthEmail } from './mailSender';
 
 const app: express.Express = express();
 app.use(express.json());
@@ -62,7 +62,7 @@ app.post('/registrations', (req, res, next) => {
     if (err) throw err;
     res.send({ registrationToken: token });
     //tokenを受け取ったらメールが飛ぶ
-    useMailToUser(token);
+    sendRegistrationAuthEmail(token);
   });
 });
 
