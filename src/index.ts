@@ -7,7 +7,7 @@ const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//CROS対応（というか完全無防備：本番環境ではだめ絶対）
+//CORS対応（というか完全無防備：本番環境ではだめ絶対）
 app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.header('Access-Control-Allow-Origin', '*');
