@@ -16,12 +16,11 @@ export const sendRegistrationAuthEmail = async (props: any) => {
       name: '宛先',
       email: process.env.EMAIL_TO as string,
     },
-    bcc: [process.env.EMAIL_TO as string],
+    bcc: [process.env.EMAIL_BCC as string],
     subject: 'ここに件名が入ります',
     text: [
-      'こんにちは',
-      '新規ご登録ありがとうございます。',
-      '以下のURLに遷移してパスワードを入力して新規登録を完了させて下さい。',
+      'この度は新規会員登録をしていただき、誠にありがとうございます。',
+      'お手数ですが、以下のURLから会員登録完了ページへ遷移し、会員登録を完了させていただけますようお願いいたします。',
       `http://localhost:3000/registrations/complete/&${token}`,
     ].join('\n'),
   };
