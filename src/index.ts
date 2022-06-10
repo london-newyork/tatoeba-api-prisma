@@ -1,8 +1,11 @@
-import { v4 as uuidv4 } from 'uuid';
-
 require('dotenv').config();
+import { v4 as uuidv4 } from 'uuid';
+import mysql from 'mysql2';
+import { getMaxListeners } from 'process';
 // import 'dotenv/config';
 import express from 'express';
+import { sendRegistrationAuthEmail } from './mailSender';
+
 const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,8 +24,6 @@ app.listen(3002, () => {
   console.log('Start on port 3002.');
 });
 
-import mysql from 'mysql2';
-import { getMaxListeners } from 'process';
 const connection = mysql.createConnection(process.env.DATABASE_URL as string);
 
 connection.connect();
@@ -60,5 +61,18 @@ app.post('/registrations', (req, res, next) => {
   connection.query(sql, [token, req.body.email], function (err) {
     if (err) throw err;
     res.send({ registrationToken: token });
+    //tokenを受け取ったらメールが飛ぶ
+    sendRegistrationAuthEmail(token);
   });
 });
+
+// app.put('/registrations', (req, res, next) => {
+//   // ここで登録完了処理をする
+//   const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+//   connection.query(sql, [token, req.body.email], function (err) {
+//     if (err) throw err;
+//     // if (token) {
+//     //   res.send({});
+//     // }
+//   });
+// });
