@@ -3,13 +3,12 @@ import { ResponseError } from '@sendgrid/helpers/classes';
 
 require('dotenv').config();
 
-export const sendRegistrationAuthEmail = async (props: any) => {
-  const { token } = props;
+export const sendRegistrationAuthEmail = async (token: string) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
   const message = {
     from: {
-      name: '差出人',
+      name: 'Tatoeba事務局',
       email: process.env.EMAIL_FROM as string,
     },
     to: {
@@ -17,11 +16,11 @@ export const sendRegistrationAuthEmail = async (props: any) => {
       email: process.env.EMAIL_TO as string,
     },
     bcc: [process.env.EMAIL_BCC as string],
-    subject: 'ここに件名が入ります',
+    subject: '新規会員登録(仮)',
     text: [
       'この度は新規会員登録をしていただき、誠にありがとうございます。',
-      'お手数ですが、以下のURLから会員登録完了ページへ遷移し、会員登録を完了させていただけますようお願いいたします。',
-      `http://localhost:3000/registrations/complete/&${token}`,
+      'お手数ですが、以下のURLから会員登録完了ページへ遷移し、会員登録を完了させていただけますようお願い申し上げます。',
+      `http://localhost:3000/registrations/complete/${token}`,
     ].join('\n'),
   };
 
