@@ -66,7 +66,9 @@ app.post('/registrations', (req, res, next) => {
   });
 });
 
-// app.put('/registrations', (req, res, next) => {
+//ユーザーがメールを受け取り、URLを踏み、認証画面でpasswordを入力して登録完了となる。
+//その際必要なのがusersテーブル、token => tokenをurlからどうやって抽出する？
+// app.put('/users', (req, res, next) => {
 //   // ここで登録完了処理をする
 //   const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
 //   connection.query(sql, [token, req.body.email], function (err) {
