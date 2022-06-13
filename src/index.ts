@@ -80,7 +80,7 @@ app.get('/*', function (req, res) {
 
 app.put('/users', (req, res, next) => {
   // ここで登録完了処理をする
-  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+  const sql = 'SELECT token, email FROM registrations';
 
   //attachedTokenを参照できない
   connection.query(sql, [attachedToken, req.body.email], function (err) {
