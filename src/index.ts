@@ -66,17 +66,50 @@ app.post('/registrations', (req, res, next) => {
   });
 });
 
-//ユーザーがメールを受け取り、URLを踏み、認証画面でpasswordを入力して登録完了となる。
-//その際必要なのがusersテーブル、token => tokenをurlからどうやって抽出する？
-app.get('/*', function (req, res) {
-  res.contentType('text/plain; charset=utf-8');
-  const url = req.originalUrl;
-  const attachedToken = url.replace(
+// http.createServer()を呼び出す場合
+// const http = require('http');
+// const server = http.createServer();
+// server.on('request', function (req, res) {
+//   // res.writeHead(200, { 'Content-Type': 'text/plain' });
+//   // res.write(req.url);
+//   // res.end();
+//   res.contentType('text/plain; charset=utf-8');
+
+//   const url = req.originalUrl;
+//   const attachedToken = url.replace(
+//     'http://localhost:3000/registrations/complete/',
+//     ''
+//   );
+//   res.end();
+// });
+// server.listen(settings.port, settings.host);
+
+//url.format()を使う場合
+const url = require('url');
+app.use('/*', function (req, res) {
+  const fullUrl = url.format({
+    protocol: req.protocol,
+    host: req.get('Host'),
+    pathname: req.originalUrl,
+  });
+  const attachedToken = fullUrl.replace(
     'http://localhost:3000/registrations/complete/',
     ''
   );
   res.end();
 });
+
+//ユーザーがメールを受け取り、URLを踏み、認証画面でpasswordを入力して登録完了となる。
+//その際必要なのがusersテーブル、token => tokenをurlからどうやって抽出する？
+// app.get('/*', function (req, res) {
+//   res.contentType('text/plain; charset=utf-8');
+//   const url = req.originalUrl;
+//   const attachedToken = url.replace(
+//     'http://localhost:3000/registrations/complete/',
+//     ''
+//   );
+//   res.end();
+// });
 
 app.put('/users', (req, res, next) => {
   // ここで登録完了処理をする
