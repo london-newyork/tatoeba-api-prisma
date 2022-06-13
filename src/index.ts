@@ -83,7 +83,6 @@ app.put('/users', (req, res, next) => {
   const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
 
   //attachedTokenを参照できない
-
   connection.query(sql, [attachedToken, req.body.email], function (err) {
     if (err) throw err;
     // if (attachedToken) {
