@@ -68,24 +68,22 @@ app.post('/registrations', (req, res, next) => {
 
 //ユーザーがメールを受け取り、URLを踏み、認証画面でpasswordを入力して登録完了となる。
 //その際必要なのがusersテーブル、token => tokenをurlからどうやって抽出する？
-app.put('/users', (req, res, next) => {
-  // ここで登録完了処理をする
-  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
-
-  const express = require('express'),
-    app = express();
-
-  app.get('/*', function (req, res) {
-    res.contentType('text/plain; charset=utf-8');
-    const url = req.originalUrl;
-    res.end();
-  });
-
-  //urlを参照できない
+app.get('/*', function (req, res) {
+  res.contentType('text/plain; charset=utf-8');
+  const url = req.originalUrl;
   const attachedToken = url.replace(
     'http://localhost:3000/registrations/complete/',
     ''
   );
+  res.end();
+});
+
+app.put('/users', (req, res, next) => {
+  // ここで登録完了処理をする
+  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+
+  //attachedTokenを参照できない
+
   connection.query(sql, [attachedToken, req.body.email], function (err) {
     if (err) throw err;
     // if (attachedToken) {
