@@ -3,7 +3,10 @@ import { ResponseError } from '@sendgrid/helpers/classes';
 
 require('dotenv').config();
 
-export const sendRegistrationAuthEmail = async (token: string) => {
+export const sendRegistrationAuthEmail = async (
+  token: string,
+  email: string
+) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
   const message = {
@@ -13,7 +16,7 @@ export const sendRegistrationAuthEmail = async (token: string) => {
     },
     to: {
       name: '宛先',
-      email: process.env.EMAIL_TO as string,
+      email: email as string,
     },
     bcc: [process.env.EMAIL_BCC as string],
     subject: '新規会員登録(仮)',
