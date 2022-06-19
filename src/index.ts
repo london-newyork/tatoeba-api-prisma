@@ -55,6 +55,9 @@ app.post('/registrations', (req, res, next) => {
   // bodyを表示
   console.log(req.body);
 
+  //email
+  console.log(req.body.email);
+
   // ここで登録処理などを行う
   const token = uuidv4();
   const email = req.body.email;
