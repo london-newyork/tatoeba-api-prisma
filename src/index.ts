@@ -69,8 +69,9 @@ app.post(
       if (err) throw err;
 
       //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
-      await sendRegistrationAuthEmail(token, email);
       res.send({ registrationToken: token });
+      // const registrationToken = res.body.registrationToken;
+      await sendRegistrationAuthEmail(token, email); //tokenではなくregistrationToken？
     });
   }
 );
