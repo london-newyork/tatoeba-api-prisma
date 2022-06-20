@@ -5,12 +5,12 @@ import { getMaxListeners } from 'process';
 // import 'dotenv/config';
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
-import { sendConfirmRegistrationAuthPassword } from './mailSenderCompleteRegistration';
+import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 
 const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+const bcrypt = require('bcrypt');
 //CORS対応（というか完全無防備：本番環境ではだめ絶対）
 app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -80,16 +80,21 @@ app.put(
   (req: express.Request, res: express.Response, next) => {
     console.log('password', req.body.password);
     console.log('token', req.body.token);
+    console.log('email', req.body.email);
 
-    const token = req.body.token;
-    const password = req.body.password;
+    const email = req.body.email;
+    const registrationToken = req.body.token;
+    const rawPassword = req.body.password;
+    const password = bcrypt.hash(rawPassword, 10);
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
+    //token => registrationToken ？DBにはそういうカラムはない
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
-    connection.query(sql, [token, password], async (err) => {
+    connection.query(sql, [registrationToken, password], async (err) => {
       if (err) throw err;
 
-      await sendConfirmRegistrationAuthPassword(password);
+      //本登録されたことをユーザーにお知らせ
+      await sendNoticeRegistrationAuthPassword(email);
       // res.send({ id, idToken, accessToken });
     });
   }

@@ -3,7 +3,7 @@ import { ResponseError } from '@sendgrid/helpers/classes';
 
 require('dotenv').config();
 
-export const sendConfirmRegistrationAuthPassword = async (email: string) => {
+export const sendNoticeRegistrationAuthPassword = async (email: string) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
   const message = {
