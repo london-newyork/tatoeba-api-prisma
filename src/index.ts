@@ -5,6 +5,7 @@ import { getMaxListeners } from 'process';
 // import 'dotenv/config';
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
+import { sendConfirmRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 
 const app: express.Express = express();
 app.use(express.json());
@@ -45,28 +46,51 @@ app.get('/users', (req: express.Request, res: express.Response) => {
   });
 });
 
-app.post('/registrations', (req, res, next) => {
-  // アクセスログ
-  console.log(req.method, req.url, req.ip);
+app.post(
+  '/registrations',
+  (req: express.Request, res: express.Response, next) => {
+    // アクセスログ
+    console.log(req.method, req.url, req.ip);
 
-  // headerを表示
-  console.log(req.headers);
+    // headerを表示
+    console.log(req.headers);
 
-  // bodyを表示
-  console.log(req.body);
+    // bodyを表示
+    console.log(req.body);
 
-  //email
-  console.log(req.body.email);
+    //email
+    console.log(req.body.email);
 
-  // ここで登録処理などを行う
-  const token = uuidv4();
-  const email = req.body.email;
-  const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
-  connection.query(sql, [token, email], async (err) => {
-    if (err) throw err;
+    // ここで登録処理などを行う
+    const token = uuidv4();
+    const email = req.body.email;
+    const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
+    connection.query(sql, [token, email], async (err) => {
+      if (err) throw err;
 
-    //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
-    await sendRegistrationAuthEmail(token, email);
-    res.send({ registrationToken: token });
-  });
-});
+      //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
+      await sendRegistrationAuthEmail(token, email);
+      res.send({ registrationToken: token });
+    });
+  }
+);
+
+app.put(
+  '/registrations',
+  (req: express.Request, res: express.Response, next) => {
+    console.log('password', req.body.password);
+    console.log('token', req.body.token);
+
+    const token = req.body.token;
+    const password = req.body.password;
+
+    // フロントから渡ってきたパスワードとトークンをDBへ登録する
+    const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
+    connection.query(sql, [token, password], async (err) => {
+      if (err) throw err;
+
+      await sendConfirmRegistrationAuthPassword(password);
+      // res.send({ id, idToken, accessToken });
+    });
+  }
+);
