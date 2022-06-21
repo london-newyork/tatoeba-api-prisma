@@ -1,8 +1,7 @@
 require('dotenv').config();
 import { v4 as uuidv4 } from 'uuid';
 import mysql from 'mysql2';
-import { getMaxListeners } from 'process';
-// import 'dotenv/config';
+
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
@@ -28,12 +27,6 @@ app.listen(3002, () => {
 const connection = mysql.createConnection(process.env.DATABASE_URL as string);
 
 connection.connect();
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
 
 //一覧取得
 app.get('/users', (req: express.Request, res: express.Response) => {
