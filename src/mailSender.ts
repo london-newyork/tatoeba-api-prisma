@@ -24,7 +24,7 @@ export const sendRegistrationAuthEmail = async (
       'この度は新規会員登録をしていただき、誠にありがとうございます。',
       'お手数ですが、以下のURLから会員登録完了ページへ遷移し、会員登録を完了させていただけますようお願い申し上げます。',
       '万が一メールにお心当たりのない場合は、破棄していただけますようお願いいたします。',
-      `${process.env.FRONTEND_URL}registrations/complete/${token}`,
+      `${process.env.FRONTEND_URL}registrations/${token}`,
     ].join('\n'),
   };
 
