@@ -77,19 +77,20 @@ app.put(
     console.log('email', req.body.email);
 
     const email = req.body.email;
-    const registrationToken = req.body.token;
+    const token = req.body.token;
     const rawPassword = req.body.password;
     const password = bcrypt.hash(rawPassword, 10);
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
     //token => registrationToken ？DBにはそういうカラムはない
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
-    connection.query(sql, [registrationToken, password], async (err) => {
+    connection.query(sql, [token, password], async (err) => {
       if (err) throw err;
 
       //本登録されたことをユーザーにお知らせ
       await sendNoticeRegistrationAuthPassword(email);
       // res.send({ id, idToken, accessToken });
+      res.send('PUT test is OK');
     });
   }
 );
