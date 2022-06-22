@@ -56,6 +56,7 @@ app.post(
 
     // ここで登録処理などを行う
     const token = uuidv4();
+    //emailのサーバー側バリデーション？
     const email = req.body.email;
     const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
     connection.query(sql, [token, email], async (err) => {
@@ -80,6 +81,7 @@ app.put(
     const rawPassword = req.body.password;
     const password = bcrypt.hash(rawPassword, 10);
 
+    //パスワード登録にJWT使うのか？
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
     connection.query(sql, [token, password], async (err) => {
