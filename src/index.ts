@@ -63,8 +63,7 @@ app.post(
 
       //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
       res.send({ registrationToken: token });
-      // const registrationToken = res.body.registrationToken;
-      await sendRegistrationAuthEmail(token, email); //tokenではなくregistrationToken？
+      await sendRegistrationAuthEmail(token, email);
     });
   }
 );
@@ -82,7 +81,6 @@ app.put(
     const password = bcrypt.hash(rawPassword, 10);
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
-    //token => registrationToken ？DBにはそういうカラムはない
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
     connection.query(sql, [token, password], async (err) => {
       if (err) throw err;
