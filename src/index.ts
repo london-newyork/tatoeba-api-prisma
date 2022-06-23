@@ -69,6 +69,27 @@ app.post(
   }
 );
 
+// フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認する
+app.get(
+  '/registrations',
+  (req: express.Request, res: express.Response, next) => {
+    const token = req.body.token;
+
+    const sql = `SELECT * FROM registrations WHERE token IN (${token});`;
+    connection.query(sql, [token], async (err, rows) => {
+      if (err) throw err;
+      console.log('token存在チェック結果', rows);
+
+      res.send(rows);
+      //NGパターン
+      // const exists = rows[sql];
+      // return exists;
+      // const isToken = rows.length;
+      // res.send({ isToken });
+    });
+  }
+);
+
 app.put(
   '/registrations',
   (req: express.Request, res: express.Response, next) => {
@@ -81,16 +102,18 @@ app.put(
     const rawPassword = req.body.password;
     const password = bcrypt.hash(rawPassword, 10);
 
-    //パスワード登録にJWT使うのか？
+    const id = '';
+    const idToken = '';
+    const accessToken = '';
+
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
     connection.query(sql, [token, password], async (err) => {
       if (err) throw err;
 
-      //本登録されたことをユーザーにお知らせ
-      await sendNoticeRegistrationAuthPassword(email);
-      // res.send({ id, idToken, accessToken });
-      res.send('PUT test is OK');
+      // //本登録されたことをユーザーにお知らせ？
+      // await sendNoticeRegistrationAuthPassword(email);
+      res.send({ id, idToken, accessToken }); //これをどうするか？
     });
   }
 );
