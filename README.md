@@ -1,4 +1,4 @@
-# アプリ概要
+# [Prisma版]アプリ概要
 
 
 **オリジナルアプリ「Tatoeba」。**
@@ -6,12 +6,20 @@
 **わかりにくい話をわかりやすく例える、「例え話を支援する」アプリです。**
 
 
-※こちらはバックエンド（API）のリポジトリです。
+※こちらは[Prisma版]バックエンドのみのリポジトリです。
 
-フロントエンドのみのリポジトリはこちら。
-（過去のIssueやPRなども見られます）
+-----
 
+[Prisma版]フロントエンドリポジトリ
+https://github.com/london-newyork/tatoeba-frontend-prisma
+
+[Prisma不使用版]フロントエンドリポジトリ
 https://github.com/london-newyork/tatoeba-frontend
+
+[Prisma不使用版]バックエンドを含むリポジトリ
+https://github.com/london-newyork/tatoeba-api
+
+-----
 
 
 ### このアプリでの機能および主なやったこと
