@@ -117,3 +117,52 @@ app.put(
     });
   }
 );
+
+//認証用のURLにアクセスしたユーザーのメールアドレスを取得
+//新しいエンドポイントを作る
+app.get(
+  '/confirmEmail',
+  (req: express.Request, res: express.Response, next) => {
+    //tokenをどうする？
+    const token = req.query.token;
+    //ユーザーのメールアドレスが確認できたとき、メールアドレスのパラメータ付きのURLへリダイレクト
+    const email = req.body.email;
+    if (email) {
+      res.redirect(`${process.env.FRONTEND_URL}registrations/?email=${email}`);
+    }
+    //確認済みフラグをかく
+
+    //エラー時対応
+    //SQL文は何を書くのか？
+    const sql = '';
+    connection.query(sql, function (err) {
+      if (err) throw err;
+      //エラーページへリダイレクトをする
+      res.redirect(`${process.env.FRONTEND_URL}registrations/error`);
+    });
+  }
+);
+
+//usersテーブルにemailとpasswordを保存する
+app.post('/users', (req: express.Request, res: express.Response, next) => {
+  //email
+  console.log(req.body.email);
+
+  // ここで登録処理などを行う
+  const email = req.body.email;
+  const rawPassword = req.body.password;
+  //passwordは平文じゃないようにする＝>ライブラリに頼る　passportなど
+  const password = bcrypt.hash(rawPassword, 10);
+  const token = req.body.token;
+  //emailが確認済みか確認する(確認済みフラグあるか)=>フラグはどこに作るのか
+
+  //usersテーブルにemailとpasswordを保存する
+  const sql = `UPDATE users SET email = ${email}, password = ${password} WHERE token = ${token}`;
+  connection.query(sql, [email, password, token], async (err) => {
+    if (err) throw err;
+
+    //ユーザーの入力したemailとtokenを受け取ったら登録完了メールが飛ぶ
+    res.send();
+    await sendNoticeRegistrationAuthPassword(email);
+  });
+});
