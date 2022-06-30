@@ -16,11 +16,11 @@
 
 https://github.com/london-newyork/tatoeba-frontend-prisma
 
-[Prisma不使用版]フロントエンドリポジトリ
+[Express+MySQL版]フロントエンドリポジトリ
 
 https://github.com/london-newyork/tatoeba-frontend
 
-[Prisma不使用版]バックエンドを含むリポジトリ
+[Express+MySQL版]バックエンドを含むリポジトリ
 
 https://github.com/london-newyork/tatoeba-api
 
