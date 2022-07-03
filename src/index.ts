@@ -5,6 +5,7 @@ import mysql from 'mysql2';
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
+import { PrismaClient } from '@prisma/client';
 
 const app: express.Express = express();
 app.use(express.json());
@@ -28,6 +29,8 @@ const connection = mysql.createConnection(process.env.DATABASE_URL as string);
 
 connection.connect();
 
+const prisma = new PrismaClient();
+
 //一覧取得
 app.get('/users', (req: express.Request, res: express.Response) => {
   // res.send(JSON.stringify(users));
@@ -41,7 +44,7 @@ app.get('/users', (req: express.Request, res: express.Response) => {
 
 app.post(
   '/registrations',
-  (req: express.Request, res: express.Response, next) => {
+  async (req: express.Request, res: express.Response, next) => {
     // アクセスログ
     console.log(req.method, req.url, req.ip);
 
@@ -55,38 +58,36 @@ app.post(
     console.log(req.body.email);
 
     // ここで登録処理などを行う
-    const token = uuidv4();
-    //emailのサーバー側バリデーション？
+    //emailかどうかのチェックをする(@などが含まれているか=>フロントでもAPIでもする)
     const email = req.body.email;
-    const sql = 'INSERT INTO registrations (token,email) VALUES (? , ?)';
-    connection.query(sql, [token, email], async (err) => {
-      if (err) throw err;
-
+    try {
+      const registration = await prisma.registration.create({
+        data: { email },
+      });
       //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
-      res.send({ registrationToken: token });
-      await sendRegistrationAuthEmail(token, email);
-    });
+      res.send({ registrationToken: registration.token });
+      await sendRegistrationAuthEmail(registration.token, registration.email);
+    } catch (err) {
+      throw err;
+      //エラーにはデータベースから返ってきた情報が含まれている。DBの情報が含まれているということはこの情報を利用して悪い人が攻撃をしてくる可能性がある。なにがあるかわからないので、DBから返ってきた情報はそのまま返すことはしない。
+      //１こ目のエラーがメールのダブリ。其の場合はダブっているということを教えることが適切。
+      //2こ目のエラーはDBがシャットダウンしてしまっているなどがあった場合は、純粋にエラーが発生しているということを知らせる（DBでエラー発生という表現はしない）
+    }
   }
 );
 
 // フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認する
 app.get(
   '/registrations',
-  (req: express.Request, res: express.Response, next) => {
+  async (req: express.Request, res: express.Response, next) => {
     const token = req.body.token;
-
-    const sql = `SELECT * FROM registrations WHERE token IN (${token});`;
-    connection.query(sql, [token], async (err, rows) => {
-      if (err) throw err;
-      console.log('token存在チェック結果', rows);
-
-      res.send(rows);
-      //NGパターン
-      // const exists = rows[sql];
-      // return exists;
-      // const isToken = rows.length;
-      // res.send({ isToken });
+    const registration = await prisma.registration.findUnique({
+      where: { token },
     });
+    if (!registration) {
+      throw new Error('Error: 存在しないTokenです');
+    }
+    res.json([registration]);
   }
 );
 
@@ -108,6 +109,10 @@ app.put(
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
     const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
+    // const registration = await prisma.registration.create({
+    //   data:
+    // });
+
     connection.query(sql, [token, password], async (err) => {
       if (err) throw err;
 
@@ -122,24 +127,20 @@ app.put(
 //新しいエンドポイントを作る
 app.get(
   '/confirmEmail',
-  (req: express.Request, res: express.Response, next) => {
-    //tokenをどうする？
-    const token = req.query.token;
+  async (req: express.Request, res: express.Response, next) => {
+    const token = req.query.token as string;
     //ユーザーのメールアドレスが確認できたとき、メールアドレスのパラメータ付きのURLへリダイレクト
-    const email = req.body.email;
-    if (email) {
+    const email = req.body.email as string;
+    try {
+      await prisma.registration.update({
+        where: { token, email, confirmedAt: null }, //既に確認された人はここでエラーになる
+        data: { confirmedAt: new Date() },
+      });
       res.redirect(`${process.env.FRONTEND_URL}registrations/?email=${email}`);
+    } catch (err) {
+      throw err;
+      //エラーの場合はエラーページへ遷移する
     }
-    //確認済みフラグをかく
-
-    //エラー時対応
-    //SQL文は何を書くのか？
-    const sql = '';
-    connection.query(sql, function (err) {
-      if (err) throw err;
-      //エラーページへリダイレクトをする
-      res.redirect(`${process.env.FRONTEND_URL}registrations/error`);
-    });
   }
 );
 
