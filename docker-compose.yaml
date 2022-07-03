@@ -1,0 +1,14 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - databse:/var/lib/postgresql/databse
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=tatoeba
+volumes:
+  databse:
