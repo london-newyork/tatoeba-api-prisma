@@ -37,7 +37,7 @@ Prismaを使ったマイグレーション、型安全を実現する
 
 ### 言語とツール等
 
-REST API(Open API)/Stoplight Studio/PlanetScale/Node.js/Express/Prisma/Lambda
+REST API(Open API)/Stoplight Studio/PlanetScale/Node.js/Express/Prisma/Lambda/PostgreSQL
 
 # 開発背景
 
