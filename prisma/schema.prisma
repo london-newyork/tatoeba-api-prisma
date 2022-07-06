@@ -13,5 +13,6 @@ datasource db {
 model Registration {
   token String @id @default(uuid())
   email String @unique
+  password String @unique
   confirmedAt DateTime?
 }
