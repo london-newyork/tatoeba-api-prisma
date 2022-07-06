@@ -1,5 +1,4 @@
 require('dotenv').config();
-import { v4 as uuidv4 } from 'uuid';
 import mysql from 'mysql2';
 
 import express from 'express';
@@ -60,6 +59,24 @@ app.post(
     // ここで登録処理などを行う
     //emailかどうかのチェックをする(@などが含まれているか=>フロントでもAPIでもする)
     const email = req.body.email;
+    const acceptableEmail = (email: string, error: Error) => {
+      () => {
+        try {
+          if (email.match(/@/)) {
+            return email;
+          }
+        } catch {
+          if (error) {
+            alert(
+              'メールアドレスが不正です。正しいメールアドレスをご入力ください。'
+            );
+          }
+        }
+      };
+    };
+    const validatedEmail = acceptableEmail(email, error as Error);
+
+    //下記でemailをvalidatedEmailに修正しようとしたところprismaの型ではじかれた。
     try {
       const registration = await prisma.registration.create({
         data: { email },
