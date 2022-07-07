@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -13,6 +14,13 @@ datasource db {
 model Registration {
   token String @id @default(uuid())
   email String @unique
-  password String @unique
   confirmedAt DateTime?
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
 }
