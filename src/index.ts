@@ -38,21 +38,10 @@ app.get('/users', async (req: express.Request, res: express.Response) => {
   res.json({ users });
 });
 
+//仮登録時にユーザーがメールアドレスを登録する
 app.post(
   '/registrations',
   async (req: express.Request, res: express.Response) => {
-    // アクセスログ
-    console.log(req.method, req.url, req.ip);
-
-    // headerを表示
-    console.log(req.headers);
-
-    // bodyを表示
-    console.log(req.body);
-
-    //email
-    console.log(req.body.email);
-
     // ここで登録処理などを行う
     //emailかどうかのチェックをする(@などが含まれているか=>フロントでもAPIでもする)
     const email = req.body.email;
@@ -64,7 +53,7 @@ app.post(
       const registration = await prisma.registration.create({
         data: { email },
       });
-      //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
+      //ユーザーの入力したemailとtokenを受け取ったら仮登録メールが飛ぶ
       res.send({ registrationToken: registration.token });
       await sendRegistrationAuthEmail(registration.token, registration.email);
     } catch (err) {
@@ -73,6 +62,7 @@ app.post(
   }
 );
 
+// ユーザーが仮登録を知らせるメールを開き、URLから本登録のフォームを操作する
 // フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認する
 app.get(
   '/registrations',
@@ -85,6 +75,10 @@ app.get(
       throw new Error('Error: 存在しないTokenです');
     }
     res.json([registration]);
+    //ユーザーはパスワードとメールアドレスを登録するため本登録操作ページへ飛ぶはずが404になる
+    await res.redirect(
+      `${process.env.FRONTEND_TOP_URL}RegisterMember/SuggestCompleteRegisterMember/`
+    );
   }
 );
 
@@ -147,3 +141,5 @@ app.get(
     }
   }
 );
+
+//本登録完了のお知らせのメールを飛ばす
