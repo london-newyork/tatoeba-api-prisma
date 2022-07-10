@@ -62,8 +62,9 @@ app.post(
   }
 );
 
-// ユーザーが仮登録を知らせるメールを開き、URLから本登録のフォームを操作する
-// フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認する
+// 受け取ったURLから、ユーザーが本登録の操作画面へ移る。
+// システムは、フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認し、
+// 本登録のフォームへ遷移。
 app.get(
   '/registrations',
   async (req: express.Request, res: express.Response) => {
@@ -75,36 +76,10 @@ app.get(
       throw new Error('Error: 存在しないTokenです');
     }
     res.json([registration]);
-    //ユーザーはパスワードとメールアドレスを登録するため本登録操作ページへ飛ぶはずが404になる
+    //ユーザーはパスワードとメールアドレスを登録するため本登録のフォームへ飛ぶはずが404になる
     await res.redirect(
       `${process.env.FRONTEND_TOP_URL}RegisterMember/SuggestCompleteRegisterMember/`
     );
-  }
-);
-
-app.post(
-  '/***password',
-  async (req: express.Request, res: express.Response) => {
-    console.log('token', req.body.token);
-
-    const token = req.body.token;
-    const rawPassword = req.body.password;
-    const password = bcrypt.hash(rawPassword, 10);
-
-    // フロントから渡ってきたパスワードとトークンをDBへ登録する
-    await prisma.$transaction(async (p) => {
-      const registration = await p.registration.findUnique({
-        where: { token },
-      });
-      if (!registration) {
-        throw new Error('登録データが見つかりません。');
-      }
-      const user = await p.user.create({
-        data: { password, email: registration.email },
-      });
-      await sendNoticeRegistrationAuthPassword(user.email);
-    });
-    res.send();
   }
 );
 
@@ -139,6 +114,33 @@ app.get(
       throw err;
       //エラーの場合はエラーページへ遷移する
     }
+  }
+);
+
+//本登録のフォームでパスワードとトークンをDBへ登録する
+app.post(
+  '/***password',
+  async (req: express.Request, res: express.Response) => {
+    console.log('token', req.body.token);
+
+    const token = req.body.token;
+    const rawPassword = req.body.password;
+    const password = bcrypt.hash(rawPassword, 10);
+
+    // フロントから渡ってきたパスワードとトークンをDBへ登録する
+    await prisma.$transaction(async (p) => {
+      const registration = await p.registration.findUnique({
+        where: { token },
+      });
+      if (!registration) {
+        throw new Error('登録データが見つかりません。');
+      }
+      const user = await p.user.create({
+        data: { password, email: registration.email },
+      });
+      await sendNoticeRegistrationAuthPassword(user.email);
+    });
+    res.send();
   }
 );
 
