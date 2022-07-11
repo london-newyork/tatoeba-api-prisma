@@ -139,6 +139,7 @@ app.post(
         data: { password, email: registration.email },
       });
       await sendNoticeRegistrationAuthPassword(user.email);
+      await sendNoticeRegistrationAuthPassword(user.email);
     });
     res.send();
   }
