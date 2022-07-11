@@ -1,6 +1,4 @@
 require('dotenv').config();
-import { v4 as uuidv4 } from 'uuid';
-import mysql from 'mysql2';
 
 import passport from 'passport';
 import { Strategy as StrategyLocal } from 'passport-local';
@@ -10,6 +8,7 @@ import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 import { PrismaClient } from '@prisma/client';
+import { validate } from 'email-validator';
 
 passport.use(
   new StrategyLocal((email, password, done) => {
@@ -43,105 +42,65 @@ app.use(
 );
 app.use(passport.initialize);
 
-app.listen(3002, () => {
-  console.log('Start on port 3002.');
+app.listen(3003, () => {
+  console.log('Start on port 3003.');
 });
-
-const connection = mysql.createConnection(process.env.DATABASE_URL as string);
-
-connection.connect();
 
 const prisma = new PrismaClient();
 
 //一覧取得
-app.get('/users', (req: express.Request, res: express.Response) => {
-  // res.send(JSON.stringify(users));
-
-  connection.query('SELECT * FROM users', function (err, rows) {
-    if (err) throw err;
-
-    res.send(rows);
+app.get('/users', async (req: express.Request, res: express.Response) => {
+  const users = await prisma.user.findMany({
+    take: 10,
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
+
+  res.json({ users });
 });
 
+//仮登録時にユーザーがメールアドレスを登録する
 app.post(
   '/registrations',
-  async (req: express.Request, res: express.Response, next) => {
-    // アクセスログ
-    console.log(req.method, req.url, req.ip);
-
-    // headerを表示
-    console.log(req.headers);
-
-    // bodyを表示
-    console.log(req.body);
-
-    //email
-    console.log(req.body.email);
-
+  async (req: express.Request, res: express.Response) => {
     // ここで登録処理などを行う
     //emailかどうかのチェックをする(@などが含まれているか=>フロントでもAPIでもする)
     const email = req.body.email;
+    if (!validate(email)) {
+      // メールアドレスの形式が正しくない時
+      throw new Error('データが不正です。');
+    }
     try {
       const registration = await prisma.registration.create({
         data: { email },
       });
-      //ユーザーの入力したemailとtokenを受け取ったらメールが飛ぶ
+      //ユーザーの入力したemailとtokenを受け取ったら仮登録メールが飛ぶ
       res.send({ registrationToken: registration.token });
       await sendRegistrationAuthEmail(registration.token, registration.email);
     } catch (err) {
       throw err;
-      //エラーにはデータベースから返ってきた情報が含まれている。DBの情報が含まれているということはこの情報を利用して悪い人が攻撃をしてくる可能性がある。なにがあるかわからないので、DBから返ってきた情報はそのまま返すことはしない。
-      //１こ目のエラーがメールのダブリ。其の場合はダブっているということを教えることが適切。
-      //2こ目のエラーはDBがシャットダウンしてしまっているなどがあった場合は、純粋にエラーが発生しているということを知らせる（DBでエラー発生という表現はしない）
     }
   }
 );
 
-// フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認する
+// 受け取ったURLから、ユーザーが本登録の操作画面へ移る。
+// システムは、フロントから渡ってきたトークンが登録されているトークンと同じかどうかを確認し、
+// 本登録のフォームへ遷移。
 app.get(
   '/registrations',
-  async (req: express.Request, res: express.Response, next) => {
-    const token = req.body.token;
+  async (req: express.Request, res: express.Response) => {
+    const token = req.query.token;
     const registration = await prisma.registration.findUnique({
       where: { token },
     });
     if (!registration) {
       throw new Error('Error: 存在しないTokenです');
     }
-    res.json([registration]);
-  }
-);
-
-app.put(
-  '/registrations',
-  (req: express.Request, res: express.Response, next) => {
-    console.log('password', req.body.password);
-    console.log('token', req.body.token);
-    console.log('email', req.body.email);
-
-    const email = req.body.email;
-    const token = req.body.token;
-    const rawPassword = req.body.password;
-    const password = bcrypt.hash(rawPassword, 10);
-
-    const id = '';
-    const idToken = '';
-    const accessToken = '';
-
-    // フロントから渡ってきたパスワードとトークンをDBへ登録する
-    const sql = 'INSERT INTO registrations (token,password) VALUES (? , ?)';
-    // const registration = await prisma.registration.create({
-    //   data:
-    // });
-
-    connection.query(sql, [token, password], async (err) => {
-      if (err) throw err;
-
-      // //本登録されたことをユーザーにお知らせ？
-      // await sendNoticeRegistrationAuthPassword(email);
-      res.send({ id, idToken, accessToken }); //これをどうするか？
-    });
+    //ユーザーはパスワードとメールアドレスを登録するため本登録のフォームへ飛ぶはずが404になる
+    await res.redirect(
+      `${process.env.FRONTEND_TOP_URL}RegisterMember/SuggestCompleteRegisterMember/?token=${token}`
+    );
   }
 );
 
@@ -149,16 +108,29 @@ app.put(
 //新しいエンドポイントを作る
 app.get(
   '/confirmEmail',
-  async (req: express.Request, res: express.Response, next) => {
+  async (req: express.Request, res: express.Response) => {
     const token = req.query.token as string;
     //ユーザーのメールアドレスが確認できたとき、メールアドレスのパラメータ付きのURLへリダイレクト
     const email = req.body.email as string;
     try {
-      await prisma.registration.update({
-        where: { token, email, confirmedAt: null }, //既に確認された人はここでエラーになる
-        data: { confirmedAt: new Date() },
+      // update を行う前にすでに　confirmedAt が null ではないか、DBから取得をして確認する
+      const registration = await prisma.registration.findUnique({
+        where: { token },
       });
-      res.redirect(`${process.env.FRONTEND_URL}registrations/?email=${email}`);
+      if (!registration) {
+        throw new Error('データの登録がありません。');
+      }
+      if (!registration?.confirmedAt) {
+        throw new Error(',...');
+      } else {
+        await prisma.registration.update({
+          where: { token, email }, //既に確認された人はここでエラーになる
+          data: { confirmedAt: new Date() },
+        });
+        res.redirect(
+          `${process.env.FRONTEND_URL}registrations/?email=${email}`
+        );
+      }
     } catch (err) {
       throw err;
       //エラーの場合はエラーページへ遷移する
@@ -166,26 +138,33 @@ app.get(
   }
 );
 
-//usersテーブルにemailとpasswordを保存する
-app.post('/users', (req: express.Request, res: express.Response, next) => {
-  //email
-  console.log(req.body.email);
+//本登録のフォームでパスワードとトークンをDBへ登録する
+app.post(
+  '/auth/set_password',
+  async (req: express.Request, res: express.Response) => {
+    console.log('token', req.body.token);
 
-  // ここで登録処理などを行う
-  const email = req.body.email;
-  const rawPassword = req.body.password;
-  //passwordは平文じゃないようにする＝>ライブラリに頼る　passportなど
-  const password = bcrypt.hash(rawPassword, 10);
-  const token = req.body.token;
-  //emailが確認済みか確認する(確認済みフラグあるか)=>フラグはどこに作るのか
+    const token = req.body.token;
+    const rawPassword = req.body.password;
+    const password = await bcrypt.hash(rawPassword, 10);
+    console.log('password ', password);
 
-  //usersテーブルにemailとpasswordを保存する
-  const sql = `UPDATE users SET email = ${email}, password = ${password} WHERE token = ${token}`;
-  connection.query(sql, [email, password, token], async (err) => {
-    if (err) throw err;
-
-    //ユーザーの入力したemailとtokenを受け取ったら登録完了メールが飛ぶ
+    // フロントから渡ってきたパスワードとトークンをDBへ登録する
+    await prisma.$transaction(async (p) => {
+      const registration = await p.registration.findUnique({
+        where: { token },
+      });
+      if (!registration) {
+        throw new Error('登録データが見つかりません。');
+      }
+      const user = await p.user.create({
+        data: { password, email: registration.email },
+      });
+      await sendNoticeRegistrationAuthPassword(user.email);
+      await sendNoticeRegistrationAuthPassword(user.email);
+    });
     res.send();
-    await sendNoticeRegistrationAuthPassword(email);
-  });
-});
+  }
+);
+
+//本登録完了のお知らせのメールを飛ばす
