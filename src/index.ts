@@ -97,9 +97,8 @@ app.get(
     if (!registration) {
       throw new Error('Error: 存在しないTokenです');
     }
-    //ユーザーはパスワードとメールアドレスを登録するため本登録のフォームへ飛ぶはずが404になる
     await res.redirect(
-      `${process.env.FRONTEND_TOP_URL}RegisterMember/SuggestCompleteRegisterMember/?token=${token}`
+      `${process.env.FRONTEND_TOP_URL}RegisterMember/CompleteRegisterMemberForm/?token=${token}`
     );
   }
 );
@@ -147,7 +146,6 @@ app.post(
     const token = req.body.token;
     const rawPassword = req.body.password;
     const password = await bcrypt.hash(rawPassword, 10);
-    console.log('password ', password);
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
     await prisma.$transaction(async (p) => {
@@ -161,10 +159,7 @@ app.post(
         data: { password, email: registration.email },
       });
       await sendNoticeRegistrationAuthPassword(user.email);
-      await sendNoticeRegistrationAuthPassword(user.email);
     });
     res.send();
   }
 );
-
-//本登録完了のお知らせのメールを飛ばす
