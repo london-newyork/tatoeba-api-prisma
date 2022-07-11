@@ -2,11 +2,32 @@ require('dotenv').config();
 import { v4 as uuidv4 } from 'uuid';
 import mysql from 'mysql2';
 
+import passport from 'passport';
+import { Strategy as StrategyLocal } from 'passport-local';
+import { ExtractJwt, Strategy as StrategyJWT } from 'passport-jwt';
+
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 import { PrismaClient } from '@prisma/client';
 
+passport.use(
+  new StrategyLocal((email, password, done) => {
+    done(null, false); //ログイン成功時はfalseの部分がユーザー情報に書き換わる。失敗時はfalse
+  })
+);
+
+passport.use(
+  new StrategyJWT(
+    {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.STRATEGYJWT_SECRET_KEY,
+    },
+    (payload, done) => {
+      done(null, payload);
+    }
+  )
+);
 const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,6 +41,7 @@ app.use(
     next();
   }
 );
+app.use(passport.initialize);
 
 app.listen(3002, () => {
   console.log('Start on port 3002.');
