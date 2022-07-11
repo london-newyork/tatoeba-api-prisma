@@ -160,11 +160,9 @@ app.post(
       const user = await p.user.create({
         data: { password, email: registration.email },
       });
-      await sendNoticeRegistrationAuthPassword(user.email);
+      //本登録完了のお知らせのメールを飛ばす
       await sendNoticeRegistrationAuthPassword(user.email);
     });
     res.send();
   }
 );
-
-//本登録完了のお知らせのメールを飛ばす
