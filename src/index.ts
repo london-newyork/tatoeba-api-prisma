@@ -11,8 +11,14 @@ import { PrismaClient } from '@prisma/client';
 import { validate } from 'email-validator';
 
 passport.use(
-  new StrategyLocal((email, password, done) => {
-    done(null, false); //ログイン成功時はfalseの部分がユーザー情報に書き換わる。失敗時はfalse
+  new StrategyLocal((email: string, password: string, done) => {
+    if (email && password) {
+      return done(null, email && password); //ログイン成功時はfalseの部分がユーザー情報に書き換わる。失敗時はfalse
+    } else {
+      return done(null, false, {
+        message: '入力情報が間違っています。',
+      });
+    }
   })
 );
 
