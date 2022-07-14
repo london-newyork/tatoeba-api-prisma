@@ -9,6 +9,11 @@ import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 import { PrismaClient } from '@prisma/client';
 import { validate } from 'email-validator';
+import { prisma } from '../src/prisma';
+//仮設定
+import AuthRouter from './route/AuthRouter';
+// import B_Router from '';
+// import C_Router from '';
 
 passport.use(
   new StrategyLocal((email: string, password: string, done) => {
@@ -46,13 +51,16 @@ app.use(
     next();
   }
 );
-app.use(passport.initialize);
+app.use(passport.initialize());
+
+// routerを追加
+app.use('/auth', AuthRouter); // /authから始まるURL
+// app.use('/b', B_Router);
+// app.use('/c', passport.authenticate('jwt', { session: false }, C_Router));
 
 app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
-
-const prisma = new PrismaClient();
 
 //一覧取得
 app.get('/users', async (req: express.Request, res: express.Response) => {
