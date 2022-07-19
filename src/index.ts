@@ -10,38 +10,13 @@ import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistra
 import { PrismaClient } from '@prisma/client';
 import { validate } from 'email-validator';
 import { prisma } from '../src/prisma';
-//仮設定
 import AuthRouter from './route/AuthRouter';
-// import B_Router from '';
-// import C_Router from '';
+import bcrypt from 'bcrypt';
 
-passport.use(
-  new StrategyLocal((email: string, password: string, done) => {
-    if (email && password) {
-      return done(null, email && password); //ログイン成功時はfalseの部分がユーザー情報に書き換わる。失敗時はfalse
-    } else {
-      return done(null, false, {
-        message: '入力情報が間違っています。',
-      });
-    }
-  })
-);
-
-passport.use(
-  new StrategyJWT(
-    {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.STRATEGYJWT_SECRET_KEY,
-    },
-    (payload, done) => {
-      done(null, payload);
-    }
-  )
-);
 const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const bcrypt = require('bcrypt');
+
 //CORS対応（というか完全無防備：本番環境ではだめ絶対）
 app.use(
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -55,8 +30,6 @@ app.use(passport.initialize());
 
 // routerを追加
 app.use('/auth', AuthRouter); // /authから始まるURL
-// app.use('/b', B_Router);
-// app.use('/c', passport.authenticate('jwt', { session: false }, C_Router));
 
 app.listen(3003, () => {
   console.log('Start on port 3003.');
@@ -104,7 +77,7 @@ app.post(
 app.get(
   '/registrations',
   async (req: express.Request, res: express.Response) => {
-    const token = req.query.token;
+    const token = String(req.query.token);
     const registration = await prisma.registration.findUnique({
       where: { token },
     });
