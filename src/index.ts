@@ -1,13 +1,10 @@
 require('dotenv').config();
-
-import passport from 'passport';
-import { Strategy as StrategyLocal } from 'passport-local';
-import { ExtractJwt, Strategy as StrategyJWT } from 'passport-jwt';
+import { passport } from './passport';
 
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
-import { PrismaClient } from '@prisma/client';
+
 import { validate } from 'email-validator';
 import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
