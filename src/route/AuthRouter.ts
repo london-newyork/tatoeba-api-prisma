@@ -1,35 +1,33 @@
+import { User } from '@prisma/client';
 import express from 'express';
 
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
-// import passport from '../lib/security';
 import { prisma } from '../prisma';
 
 const router = express.Router();
 
 const bcrypt = require('bcrypt');
 
-router.get('/login', async (req, res, next) => {
-  const email = req.body.email;
-  console.log('email', email);
+// router.get('/login', async (req, res, next) => {
+//   const email = req.body.email;
+//   console.log('email', email);
 
-  const password = req.body.password;
-  const user = await prisma.user.findUnique({ where: { email } });
-});
+//   const password = req.body.password;
+//   const user = await prisma.user.findUnique({ where: { email, id: '' } });
+// });
 
 router.post(
   '/login',
   passport.authenticate('local', {
     session: false,
-    successReturnToOrRedirect: '/',
-    failureRedirect: '/login',
-    failureMessage: true,
   }),
   async (req, res, next) => {
     // 1 jwtのtokenを作成 passwordはペイロードに含めない
     const email = req.body.email;
     const password = req.body.password;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = req.user as User;
+    // const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new Error('ログイン情報が正しくありません。');
     }
@@ -38,10 +36,8 @@ router.post(
       throw new Error('ログイン情報が正しくありません。');
     }
     // const payload = { email: user.email, id: user.id };
+
     const payload = { email: user.email };
-    console.log('-------------------');
-    console.log('payload', payload);
-    console.log('-------------------');
     const token = jwt.sign(
       payload,
       process.env.STRATEGYJWT_SECRET_KEY as string,
