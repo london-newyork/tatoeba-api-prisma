@@ -9,13 +9,13 @@ const router = express.Router();
 
 const bcrypt = require('bcrypt');
 
-router.get('/login', async (req, res, next) => {
-  const email = req.body.email;
-  console.log('email', email);
+// router.get('/login', async (req, res, next) => {
+//   const email = req.body.email;
+//   console.log('email', email);
 
-  const password = req.body.password;
-  const user = await prisma.user.findUnique({ where: { email, id: '' } });
-});
+//   const password = req.body.password;
+//   const user = await prisma.user.findUnique({ where: { email, id: '' } });
+// });
 
 router.post(
   '/login',
