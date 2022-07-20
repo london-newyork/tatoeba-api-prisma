@@ -6,8 +6,6 @@ import passport from 'passport';
 
 const router = express.Router();
 
-const bcrypt = require('bcrypt');
-
 router.post(
   '/login',
   passport.authenticate('local', {
