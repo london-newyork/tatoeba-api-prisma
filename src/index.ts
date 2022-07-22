@@ -33,16 +33,21 @@ app.listen(3003, () => {
 });
 
 //一覧取得
-app.get('/users', async (req: express.Request, res: express.Response) => {
-  const users = await prisma.user.findMany({
-    take: 10,
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+app.get(
+  '/users',
+  passport.authenticate('jwt', { session: false }),
+  async (req: express.Request, res: express.Response) => {
+    console.log('user: ', req.user);
+    const users = await prisma.user.findMany({
+      take: 10,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-  res.json({ users });
-});
+    res.json({ users });
+  }
+);
 
 //仮登録時にユーザーがメールアドレスを登録する
 app.post(
