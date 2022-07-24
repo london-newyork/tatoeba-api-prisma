@@ -24,7 +24,22 @@ router.post(
     );
     res.json({ token });
     //12h以降のrefreshTokenを用意する。
-    //フロント側でtokenを保存
+  }
+);
+
+router.post(
+  '/logout',
+  passport.authenticate('local', {
+    session: false,
+  }),
+  async (req, res, next) => {
+    req.logOut((err) => {
+      if (err) {
+        return next(err);
+      }
+      req.body.token = null;
+      res.redirect('/');
+    });
   }
 );
 
