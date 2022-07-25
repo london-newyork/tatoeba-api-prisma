@@ -27,20 +27,4 @@ router.post(
   }
 );
 
-router.post(
-  '/logout',
-  passport.authenticate('local', {
-    session: false,
-  }),
-  async (req, res, next) => {
-    req.logOut((err) => {
-      if (err) {
-        return next(err);
-      }
-      req.body.token = null;
-      res.redirect('/');
-    });
-  }
-);
-
 export default router;
