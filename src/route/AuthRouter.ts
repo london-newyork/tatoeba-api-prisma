@@ -24,7 +24,6 @@ router.post(
     );
     res.json({ token });
     //12h以降のrefreshTokenを用意する。
-    //フロント側でtokenを保存
   }
 );
 
