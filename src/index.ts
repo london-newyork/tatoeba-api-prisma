@@ -35,23 +35,6 @@ app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
 
-// password再設定の際にjwtがあるか確認してからページにアクセスさせる
-app.get(
-  '/reset_password',
-  passport.authenticate('jwt', { session: false }),
-  async (req: express.Request, res: express.Response) => {
-    console.log('user: ', req.user);
-    const users = await prisma.user.findMany({
-      take: 1,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    res.json({ users });
-  }
-);
-
 //一覧取得
 app.get(
   '/users',
