@@ -8,6 +8,8 @@ import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistra
 import { validate } from 'email-validator';
 import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
+import PasswordRouter from './route/PasswordRouter';
+
 import bcrypt from 'bcrypt';
 
 const app: express.Express = express();
@@ -27,6 +29,7 @@ app.use(passport.initialize());
 
 // routerを追加
 app.use('/auth', AuthRouter); // /authから始まるURL
+app.use('/password', PasswordRouter);
 
 app.listen(3003, () => {
   console.log('Start on port 3003.');
