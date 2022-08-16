@@ -50,6 +50,35 @@ app.get(
   }
 );
 
+// userNameを登録する
+app.post(
+  '/users',
+  // passport.authenticate('jwt', { session: false }),
+  async (req: express.Request, res: express.Response) => {
+    const email = req.body.email;
+    const userName = req.body.userName;
+    console.log('userのemail,userName：', email, userName);
+
+    if (!validate(email)) {
+      // メールアドレスの形式が正しくない時
+      throw new Error('データが不正です。');
+    }
+    try {
+      await prisma.user.update({
+        where: { email },
+        data: { userName },
+      });
+
+      await res.send({ message: 'ユーザー名を変更しました' });
+      // await res.redirect(
+      //   `${process.env.FRONTEND_URL}/?users=${}`
+      // );
+    } catch (err) {
+      throw err;
+    }
+  }
+);
+
 //仮登録時にユーザーがメールアドレスを登録する
 app.post(
   '/registrations',
