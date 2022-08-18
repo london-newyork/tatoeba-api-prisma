@@ -62,29 +62,25 @@ router.get(
 
 // userNameを登録する
 router.post(
-  '/',
+  '/:id',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
-    const email = req.body.email;
+    const id = req.params.id;
+    const userId = (req.user as RequestUser)?.id;
     const userName = req.body.userName;
-    console.log('userのemail,userName：', email, userName);
+    console.log('userのusedId,userName：', id, userName);
 
-    if (!validate(email)) {
-      // メールアドレスの形式が正しくない時
-      throw new Error('データが不正です。');
-    }
-    try {
-      await prisma.user.update({
-        where: { email },
-        data: { userName },
-      });
+    if (userId === id) {
+      try {
+        await prisma.user.update({
+          where: { id },
+          data: { userName },
+        });
 
-      res.send({ message: 'ユーザー名を変更しました' });
-      // await res.redirect(
-      //   `${process.env.FRONTEND_URL}/?users=${}`
-      // );
-    } catch (err) {
-      throw err;
+        res.send({ message: 'ユーザー名を変更しました' });
+      } catch (err) {
+        throw err;
+      }
     }
   }
 );
