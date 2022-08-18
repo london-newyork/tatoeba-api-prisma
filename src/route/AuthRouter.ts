@@ -6,6 +6,7 @@ import passport from 'passport';
 import { prisma } from '../prisma';
 
 import bcrypt from 'bcrypt';
+import { sendNoticeRegistrationAuthPassword } from '../mailSenderCompleteRegistration';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.post(
     // 1 jwtのtokenを作成 passwordはペイロードに含めない
     const user = req.user as User;
     const payload = { email: user.email, id: user.id };
+    const userId = payload.id;
     const token = jwt.sign(
       payload,
       process.env.STRATEGYJWT_SECRET_KEY as string,
@@ -25,7 +27,7 @@ router.post(
         expiresIn: '12h',
       }
     );
-    res.json({ token });
+    res.json({ token, userId });
     //12h以降のrefreshTokenを用意する。
   }
 );
@@ -64,6 +66,33 @@ router.post(
     });
 
     res.json({ message: 'パスワード変更完了しました' });
+  }
+);
+
+//本登録のフォームでパスワードとトークンをDBへ登録する
+router.post(
+  '/set_password',
+  async (req: express.Request, res: express.Response) => {
+    console.log('token', req.body.token);
+
+    const token = req.body.token;
+    const rawPassword = req.body.password;
+    const password = await bcrypt.hash(rawPassword, 10);
+
+    // フロントから渡ってきたパスワードとトークンをDBへ登録する
+    await prisma.$transaction(async (p) => {
+      const registration = await p.registration.findUnique({
+        where: { token },
+      });
+      if (!registration) {
+        throw new Error('登録データが見つかりません。');
+      }
+      const user = await p.user.create({
+        data: { password, email: registration.email },
+      });
+      await sendNoticeRegistrationAuthPassword(user.email);
+    });
+    res.send();
   }
 );
 

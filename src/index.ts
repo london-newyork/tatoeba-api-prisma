@@ -3,13 +3,11 @@ import { passport } from './passport';
 
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
-import { sendNoticeRegistrationAuthPassword } from './mailSenderCompleteRegistration';
 
 import { validate } from 'email-validator';
 import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
-
-import bcrypt from 'bcrypt';
+import UserRouter from './route/UserRouter';
 
 const app: express.Express = express();
 app.use(express.json());
@@ -28,56 +26,11 @@ app.use(passport.initialize());
 
 // routerを追加
 app.use('/auth', AuthRouter); // /authから始まるURL
+app.use('/users', UserRouter);
 
 app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
-
-//一覧取得
-app.get(
-  '/users',
-  passport.authenticate('jwt', { session: false }),
-  async (req: express.Request, res: express.Response) => {
-    console.log('user: ', req.user);
-    const users = await prisma.user.findMany({
-      take: 10,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    res.json({ users });
-  }
-);
-
-// userNameを登録する
-app.post(
-  '/users',
-  // passport.authenticate('jwt', { session: false }),
-  async (req: express.Request, res: express.Response) => {
-    const email = req.body.email;
-    const userName = req.body.userName;
-    console.log('userのemail,userName：', email, userName);
-
-    if (!validate(email)) {
-      // メールアドレスの形式が正しくない時
-      throw new Error('データが不正です。');
-    }
-    try {
-      await prisma.user.update({
-        where: { email },
-        data: { userName },
-      });
-
-      await res.send({ message: 'ユーザー名を変更しました' });
-      // await res.redirect(
-      //   `${process.env.FRONTEND_URL}/?users=${}`
-      // );
-    } catch (err) {
-      throw err;
-    }
-  }
-);
 
 //仮登録時にユーザーがメールアドレスを登録する
 app.post(
@@ -153,32 +106,5 @@ app.get(
       throw err;
       //エラーの場合はエラーページへ遷移する
     }
-  }
-);
-
-//本登録のフォームでパスワードとトークンをDBへ登録する
-app.post(
-  '/auth/set_password',
-  async (req: express.Request, res: express.Response) => {
-    console.log('token', req.body.token);
-
-    const token = req.body.token;
-    const rawPassword = req.body.password;
-    const password = await bcrypt.hash(rawPassword, 10);
-
-    // フロントから渡ってきたパスワードとトークンをDBへ登録する
-    await prisma.$transaction(async (p) => {
-      const registration = await p.registration.findUnique({
-        where: { token },
-      });
-      if (!registration) {
-        throw new Error('登録データが見つかりません。');
-      }
-      const user = await p.user.create({
-        data: { password, email: registration.email },
-      });
-      await sendNoticeRegistrationAuthPassword(user.email);
-    });
-    res.send();
   }
 );
