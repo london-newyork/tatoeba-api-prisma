@@ -61,11 +61,8 @@ router.get(
 );
 
 // userNameを登録する
-router.param('id', function (req, res, next, id) {
-  next();
-});
 
-router.post(
+router.put(
   '/:id',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
