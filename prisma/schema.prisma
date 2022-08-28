@@ -24,7 +24,7 @@ model User {
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
-  tatoe Tatoe?
+  tatoe Tatoe[]
 }
 
 model Tatoe {
