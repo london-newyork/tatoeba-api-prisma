@@ -36,6 +36,7 @@
     "@types/mysql": "^2.15.21",
     "@types/uuid": "^8.3.4",
     "bcrypt": "^5.0.1",
+    "date-fns": "^2.29.2",
     "dotenv": "^16.0.1",
     "email-validator": "^2.0.4",
     "express": "^4.18.1",
