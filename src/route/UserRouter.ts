@@ -4,16 +4,13 @@ import express from 'express';
 import passport from 'passport';
 import { prisma } from '../prisma';
 
-import { validate } from 'email-validator';
 import { RequestUser } from '../@types/express';
 import UserTatoeRouter from '../route/UserTatoeRouter';
-import TatoeRouter from '../route/TatoeRouter';
 
 const router = express.Router();
-// (/users)/tatoe
-router.use('/tatoe', TatoeRouter);
-// (/users)/:id/tatoe
-router.use('/:id', UserTatoeRouter);
+
+// (/users)/:userId/tatoe/:tatoeId
+router.use('/:userId/tatoe', UserTatoeRouter);
 
 //一覧取得
 router.get(
