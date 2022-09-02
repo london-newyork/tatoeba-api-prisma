@@ -45,16 +45,12 @@ router.post(
 );
 
 // 自分のtatoe更新
-
 router.put(
   '/:id',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
     const userId = (req.user as RequestUser)?.id;
     const id = req.params.id;
-    console.log(id);
-    console.log('userId', userId);
-
     const { tId, title, shortParaphrase, description } = req.body;
     if (tId === id) {
       try {
@@ -68,7 +64,6 @@ router.put(
             description,
           },
         });
-        console.log(tatoe);
 
         // const createdAt = tatoe.createdAt;
         // const formattedCreatedAt = formatDate(createdAt, dateFormat);
