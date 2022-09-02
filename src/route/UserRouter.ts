@@ -4,17 +4,20 @@ import express from 'express';
 import passport from 'passport';
 import { prisma } from '../prisma';
 
-import { validate } from 'email-validator';
 import { RequestUser } from '../@types/express';
+import UserTatoeRouter from '../route/UserTatoeRouter';
 
 const router = express.Router();
+
+// (/users)/:userId/tatoe/:tatoeId
+router.use('/:userId/tatoe', UserTatoeRouter);
 
 //一覧取得
 router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
-    // 本当は他のユーザーの情報はみれないようにする
+    // 本当は他のユーザーの情報はみられないようにする
     console.log('user: ', req.user);
     const users = await prisma.user.findMany({
       take: 10,
@@ -69,7 +72,6 @@ router.put(
     const id = req.params.id;
     const userId = (req.user as RequestUser)?.id;
     const userName = req.body.userName;
-    console.log('userのusedId,userName：', id, userName);
 
     if (userId === id) {
       try {

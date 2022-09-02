@@ -5,8 +5,9 @@ import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import { prisma } from '../prisma';
 
-import bcrypt from 'bcrypt';
 import { sendNoticeRegistrationAuthPassword } from '../mailSenderCompleteRegistration';
+
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -42,6 +43,7 @@ router.post(
 
     // currentPassword, newPasswordをボディから抽出
     const { currentPassword, newPassword } = req.body;
+    console.log('currentPassword, newPassword', currentPassword, newPassword);
 
     // userId を用いてユーザーデータをDBから取得する なかったらエラーになるようにする
     const user = await prisma.user.findUniqueOrThrow({

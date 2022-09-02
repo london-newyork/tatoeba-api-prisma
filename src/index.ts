@@ -8,7 +8,7 @@ import { validate } from 'email-validator';
 import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
-
+import TatoeRouter from './route/TatoeRouter';
 const app: express.Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,10 +24,16 @@ app.use(
 );
 app.use(passport.initialize());
 
-// routerを追加
-app.use('/auth', AuthRouter); // /authから始まるURL
-app.use('/users', UserRouter);
+/**
+ *
+ * POST /users/:userId/tatoe -> ユーザーのたとえを作成する -> 他の人たとえを作成する /users/abc/tatoe
+ * POST /tatoe -> たとえを作成する
+ */
 
+// routerを追加
+app.use('/auth', AuthRouter);
+app.use('/users', UserRouter);
+app.use('/tatoe', TatoeRouter);
 app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
@@ -47,7 +53,6 @@ app.post(
       const registration = await prisma.registration.create({
         data: { email },
       });
-      //ユーザーの入力したemailとtokenを受け取ったら仮登録メールが飛ぶ
       res.send({ registrationToken: registration.token });
       await sendRegistrationAuthEmail(registration.token, registration.email);
     } catch (err) {
@@ -84,7 +89,6 @@ app.get(
     //ユーザーのメールアドレスが確認できたとき、メールアドレスのパラメータ付きのURLへリダイレクト
     const email = req.body.email as string;
     try {
-      // update を行う前にすでに　confirmedAt が null ではないか、DBから取得をして確認する
       const registration = await prisma.registration.findUnique({
         where: { token },
       });
@@ -95,7 +99,7 @@ app.get(
         throw new Error(',...');
       } else {
         await prisma.registration.update({
-          where: { token, email }, //既に確認された人はここでエラーになる
+          where: { token, email },
           data: { confirmedAt: new Date() },
         });
         res.redirect(
@@ -104,7 +108,6 @@ app.get(
       }
     } catch (err) {
       throw err;
-      //エラーの場合はエラーページへ遷移する
     }
   }
 );
