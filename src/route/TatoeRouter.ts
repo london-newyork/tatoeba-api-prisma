@@ -44,7 +44,41 @@ router.post(
   }
 );
 
-//  TODO PUT /tatoe/hoge -> id が hoge の tatoe を更新（作成者が自分自身）
+// 自分のtatoe更新
+
+router.put(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req: express.Request, res: express.Response) => {
+    const userId = (req.user as RequestUser)?.id;
+    const id = req.params.id;
+    console.log(id);
+    console.log('userId', userId);
+
+    const { tId, title, shortParaphrase, description } = req.body;
+    if (tId === id) {
+      try {
+        const tatoe = await prisma.tatoe.update({
+          where: { id },
+          data: {
+            userId,
+            id,
+            title,
+            shortParaphrase,
+            description,
+          },
+        });
+        console.log(tatoe);
+
+        // const createdAt = tatoe.createdAt;
+        // const formattedCreatedAt = formatDate(createdAt, dateFormat);
+        res.json({ data: tatoe });
+      } catch {
+        throw Error('更新できませんでした');
+      }
+    }
+  }
+);
 
 //  TODO DELETE /tatoe/hoge -> id が hoge の tatoe を削除（自分が作ったもののみ許可）
 export default router;
