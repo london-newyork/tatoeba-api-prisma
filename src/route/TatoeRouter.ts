@@ -2,7 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import { RequestUser } from '../@types/express';
 import { prisma } from '../prisma';
-import { formatDate } from '../date';
+import { DateFormat, dateFormat, formatDate, FormattedDate } from '../date';
 const router = express.Router();
 
 // TODO GET /totae -> 全ての人の tatoe 一覧
@@ -38,6 +38,8 @@ router.post(
         description,
       },
     });
+    // const createdAt = tatoe.createdAt;
+    // const formattedCreatedAt = formatDate(createdAt, dateFormat);
     res.json({ data: tatoe });
   }
 );
