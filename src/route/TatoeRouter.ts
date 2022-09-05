@@ -75,5 +75,23 @@ router.put(
   }
 );
 
-//  TODO DELETE /tatoe/hoge -> id が hoge の tatoe を削除（自分が作ったもののみ許可）
+router.delete(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req: express.Request, res: express.Response) => {
+    const id = req.params.id;
+    const { tId } = req.body;
+    if (tId === id) {
+      try {
+        const tatoe = await prisma.tatoe.delete({
+          where: { id },
+        });
+        res.json({ data: tatoe });
+      } catch {
+        throw Error('削除できませんでした');
+      }
+    }
+  }
+);
+
 export default router;
