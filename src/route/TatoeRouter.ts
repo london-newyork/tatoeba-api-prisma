@@ -5,8 +5,6 @@ import { prisma } from '../prisma';
 import { DateFormat, dateFormat, formatDate, FormattedDate } from '../date';
 const router = express.Router();
 
-// TODO GET /totae -> 全ての人の tatoe 一覧
-
 router.get('/', async (req: express.Request, res: express.Response) => {
   const tatoe = await prisma.tatoe.findMany({
     take: 100,
@@ -16,12 +14,6 @@ router.get('/', async (req: express.Request, res: express.Response) => {
   });
   res.json({ tatoe });
 });
-
-//  TODO GET /totae/hoge -> id が hoge の tatoe を取得
-// /tatoe/:id => userIdをフロントから運んでもらう
-
-//  TODO POST /totae -> 自分の tatoe を作成
-//  TODO 整形したformatDateをどこで適用するべきか考え中
 
 router.post(
   '/',
