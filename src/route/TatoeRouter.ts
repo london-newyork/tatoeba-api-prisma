@@ -21,6 +21,7 @@ router.post(
   async (req: express.Request, res: express.Response) => {
     const userId = (req.user as RequestUser)?.id;
     const { tId, title, shortParaphrase, description } = req.body;
+
     const tatoe = await prisma.tatoe.create({
       data: {
         userId,
@@ -44,6 +45,7 @@ router.put(
     const userId = (req.user as RequestUser)?.id;
     const id = req.params.id;
     const { tId, title, shortParaphrase, description } = req.body;
+
     if (tId === id) {
       try {
         const tatoe = await prisma.tatoe.update({

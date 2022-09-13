@@ -9,7 +9,9 @@ import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
 import TatoeRouter from './route/TatoeRouter';
+
 const app: express.Express = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,12 +25,6 @@ app.use(
   }
 );
 app.use(passport.initialize());
-
-/**
- *
- * POST /users/:userId/tatoe -> ユーザーのたとえを作成する -> 他の人たとえを作成する /users/abc/tatoe
- * POST /tatoe -> たとえを作成する
- */
 
 // routerを追加
 app.use('/auth', AuthRouter);

@@ -1,5 +1,5 @@
-import { User } from '@prisma/client';
 import express from 'express';
+import multer from 'multer';
 
 import passport from 'passport';
 import { prisma } from '../prisma';
@@ -8,6 +8,7 @@ import { RequestUser } from '../@types/express';
 import UserTatoeRouter from '../route/UserTatoeRouter';
 
 const router = express.Router();
+const upload = multer({ dest: 'uploads/' });
 
 // (/users)/:userId/tatoe/:tatoeId
 router.use('/:userId/tatoe', UserTatoeRouter);
@@ -87,4 +88,20 @@ router.put(
     }
   }
 );
+
+// TODO GET: /users /:id/profile_image
+
+// profile_image file登録
+router.put(
+  '/:id/profile_image',
+  passport.authenticate('jwt', { session: false }),
+  upload.single('image'),
+  // fetch(---, {body: {image: File }})
+  async (req: express.Request, res: express.Response) => {
+    const id = req.params.id;
+    const userId = (req.user as RequestUser)?.id;
+    const file = req.file;
+  }
+);
+
 export default router;
