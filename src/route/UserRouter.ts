@@ -19,7 +19,6 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
     // 本当は他のユーザーの情報はみられないようにする
-    console.log('user: ', req.user);
     const users = await prisma.user.findMany({
       take: 10,
       orderBy: {
@@ -76,12 +75,11 @@ router.put(
 
     if (userId === id) {
       try {
-        await prisma.user.update({
+        const updatedData = await prisma.user.update({
           where: { id },
           data: { userName },
         });
-
-        res.send({ message: 'ユーザー名を変更しました' });
+        res.json({ updatedData });
       } catch (err) {
         throw err;
       }

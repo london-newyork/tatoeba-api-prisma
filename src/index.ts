@@ -1,6 +1,11 @@
 require('dotenv').config();
-import { passport } from './passport';
 
+import { passport } from './passport';
+import {
+  googleCloudStorageUploadFile,
+  googleCloudStorageReadFile,
+  googleCloudStorageDeleteFile,
+} from './googleCloudStorage';
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 

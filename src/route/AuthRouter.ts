@@ -21,6 +21,7 @@ router.post(
     const user = req.user as User;
     const payload = { email: user.email, id: user.id };
     const userId = payload.id;
+
     const token = jwt.sign(
       payload,
       process.env.STRATEGYJWT_SECRET_KEY as string,
@@ -38,12 +39,10 @@ router.post(
   '/password_reset',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
-    console.log('user: ', req.user);
     const userId = (req.user as any).id;
 
     // currentPassword, newPasswordをボディから抽出
     const { currentPassword, newPassword } = req.body;
-    console.log('currentPassword, newPassword', currentPassword, newPassword);
 
     // userId を用いてユーザーデータをDBから取得する なかったらエラーになるようにする
     const user = await prisma.user.findUniqueOrThrow({
@@ -75,8 +74,6 @@ router.post(
 router.post(
   '/set_password',
   async (req: express.Request, res: express.Response) => {
-    console.log('token', req.body.token);
-
     const token = req.body.token;
     const rawPassword = req.body.password;
     const password = await bcrypt.hash(rawPassword, 10);
