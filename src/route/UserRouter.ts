@@ -3,9 +3,15 @@ import multer from 'multer';
 
 import passport from 'passport';
 import { prisma } from '../prisma';
+import { Storage } from '@google-cloud/storage';
+import sharp from 'sharp';
 
 import { RequestUser } from '../@types/express';
 import UserTatoeRouter from '../route/UserTatoeRouter';
+import {
+  getGoogleCloudStorageInfo,
+  googleCloudStorageUploadFile,
+} from '../googleCloudStorage';
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -99,6 +105,40 @@ router.put(
     const id = req.params.id;
     const userId = (req.user as RequestUser)?.id;
     const file = req.file;
+    //   googleCloudStorageUploadFile({
+    //     destinationFilePath: '/',
+    //     fileName: 'uploads/test.png',
+    //   });
+    //'{秘密鍵の場所}';
+    const thisProjectId = process.env.GCS_PROJECT_ID;
+    const keyFilename = process.env.GCS_SERVICE_KEY_PATH;
+
+    //'{任意の名前で作成したバケット名}';
+    const bucketName = process.env.GCS_BUCKET_NAME;
+
+    // バケットの取得
+    const storage = new Storage({
+      projectId: thisProjectId,
+      keyFilename: keyFilename,
+    });
+    const bucket = storage.bucket(bucketName as string);
+    console.log(file?.originalname);
+
+    try {
+      if (file) {
+        console.log('====== now uploading ======');
+
+        const blob = bucket.file(file.originalname);
+        const blobStream = blob.createWriteStream();
+        blobStream.on('finish', () => {
+          res.status(200).send('Success');
+          console.log('Success');
+        });
+        blobStream.end(file.buffer);
+      } else throw 'error with img';
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }
 );
 

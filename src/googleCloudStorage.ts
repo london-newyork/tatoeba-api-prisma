@@ -60,16 +60,31 @@ const googleCloudStorageReadFile = async (prefix: ReadFile) => {
 
 // ファイルアップロード
 type UploadFile = {
+  // req: express.Request;
   destinationFilePath: string;
   fileName: string;
 };
 const googleCloudStorageUploadFile = async ({
+  // req,
   destinationFilePath,
   fileName,
 }: UploadFile) => {
   // 例 filePath : 'dest/example.txt'
   // 例 fileName : 'example.txt'
   await bucket.upload(fileName, { destination: destinationFilePath });
+  // try {
+  //   if (req.file) {
+  //     const blob = bucket.file(req.file.originalName);
+  //     const blobStream = blob.createWriteStream();
+  //     blobStream.on('finish', () => {
+  //       res.status(200).send('Success');
+  //       console.log('Success');
+  //     });
+  //     blobStream.end(req.file.buffer);
+  //   } else throw 'error with img';
+  // } catch (error) {
+  //   res.status(500).send(error);
+  // }
 };
 
 // ファイル削除

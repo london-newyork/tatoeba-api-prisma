@@ -39,6 +39,7 @@ yarn-error.log*
 # SSH
 .ssh
 /.ssh
+/gcs-secret-key.json
 
 # Image
 /uploads
