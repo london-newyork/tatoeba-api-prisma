@@ -35,3 +35,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# SSH
+.ssh
+/.ssh
+
+# Image
+/uploads

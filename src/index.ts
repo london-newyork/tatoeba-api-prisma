@@ -1,11 +1,7 @@
 require('dotenv').config();
 
 import { passport } from './passport';
-import {
-  googleCloudStorageUploadFile,
-  googleCloudStorageReadFile,
-  googleCloudStorageDeleteFile,
-} from './googleCloudStorage';
+
 import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 
@@ -14,6 +10,10 @@ import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
 import TatoeRouter from './route/TatoeRouter';
+import {
+  getGoogleCloudStorageInfo,
+  googleCloudStorageUploadFile,
+} from './googleCloudStorage';
 
 const app: express.Express = express();
 
