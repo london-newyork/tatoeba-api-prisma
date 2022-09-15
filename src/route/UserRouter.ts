@@ -121,24 +121,40 @@ router.put(
       projectId: thisProjectId,
       keyFilename: keyFilename,
     });
-    const bucket = storage.bucket(bucketName as string);
-    console.log(file?.originalname);
+    // const bucket = storage.bucket(bucketName as string);
+    if (file && bucketName) {
+      const main = async () => {
+        await storage
+          .bucket(bucketName)
+          .upload(`${file?.path}`, { gzip: true })
+          .then((res) => {
+            // 公開状態にする場合
+            // res[0].makePublic();
+            console.log(res[0].metadata);
+            console.log('Success');
+          })
+          .catch((err) => {
+            console.error('ERROR:', err);
+          });
+      };
 
-    try {
-      if (file) {
-        console.log('====== now uploading ======');
+      main();
+    } else throw 'There are no file and bucketName';
+    // try {
+    //   if (file) {
+    //     console.log('====== now uploading ======');
 
-        const blob = bucket.file(file.originalname);
-        const blobStream = blob.createWriteStream();
-        blobStream.on('finish', () => {
-          res.status(200).send('Success');
-          console.log('Success');
-        });
-        blobStream.end(file.buffer);
-      } else throw 'error with img';
-    } catch (error) {
-      res.status(500).send(error);
-    }
+    //     const blob = bucket.file(file.originalname);
+    //     const blobStream = blob.createWriteStream();
+    //     blobStream.on('finish', () => {
+    //       res.status(200).send('Success');
+    //       console.log('Success');
+    //     });
+    //     blobStream.end(file.buffer);
+    //   } else throw 'error with img';
+    // } catch (error) {
+    //   res.status(500).send(error);
+    // }
   }
 );
 
