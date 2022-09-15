@@ -10,10 +10,7 @@ import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
 import TatoeRouter from './route/TatoeRouter';
-import {
-  getGoogleCloudStorageInfo,
-  googleCloudStorageUploadFile,
-} from './googleCloudStorage';
+import path from 'path';
 
 const app: express.Express = express();
 
@@ -38,6 +35,9 @@ app.use('/tatoe', TatoeRouter);
 app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
+
+// 画像登録で必要
+app.use(express.static(path.join(__dirname, 'uploads')));
 
 //仮登録時にユーザーがメールアドレスを登録する
 app.post(
