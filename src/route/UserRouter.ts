@@ -8,10 +8,7 @@ import sharp from 'sharp';
 
 import { RequestUser } from '../@types/express';
 import UserTatoeRouter from '../route/UserTatoeRouter';
-import {
-  getGoogleCloudStorageInfo,
-  googleCloudStorageUploadFile,
-} from '../googleCloudStorage';
+import fs from 'fs/promises';
 
 const router = express.Router();
 
@@ -131,18 +128,23 @@ router.put(
     if (userId === id) {
       if (file && bucketName) {
         const main = async () => {
-          await googleStorage
-            .bucket(bucketName)
-            .upload(`${file?.path}`, { gzip: true })
-            .then((res) => {
-              // 公開状態にする場合
-              // res[0].makePublic();
-              console.log(res[0].metadata);
-              console.log('Success');
-            })
-            .catch((err) => {
-              console.error('ERROR:', err);
-            });
+          try {
+            await googleStorage
+              .bucket(bucketName)
+              .upload(`${file.path}`, { gzip: true })
+              .then((res) => {
+                // 公開状態にする場合
+                // res[0].makePublic();
+                console.log(res[0].metadata);
+                console.log('Success');
+              })
+              .catch((err) => {
+                console.error('ERROR:', err);
+              });
+          } finally {
+            await fs.unlink(file.path);
+            console.log('File has been deleted');
+          }
         };
         main();
       } else throw 'There are no file and bucketName';
