@@ -1,41 +1,28 @@
 import { Storage } from '@google-cloud/storage';
 import sharp from 'sharp';
+import multer from 'multer';
 
-//'{秘密鍵の場所}';
 const thisProjectId = process.env.GCS_PROJECT_ID;
 const keyFilename = process.env.GCS_SERVICE_KEY_PATH;
 
-//'{任意の名前で作成したバケット名}';
 const bucketName = process.env.GCS_BUCKET_NAME;
-
-// バケットの取得
-const storage = new Storage({
+const googleStorage = new Storage({
   projectId: thisProjectId,
   keyFilename: keyFilename,
 });
-const bucket = storage.bucket(bucketName as string);
 
-// テストでファイル取得
-const getGoogleCloudStorageInfo = async () => {
-  // const file = await bucket.getFiles({
-  //   prefix: '/',
-  //   autoPaginate: false,
-  //   delimiter: '/',
-  // });
-  // console.log(file[0]);
-  bucket
-    .getFiles()
-    .then((data) => {
-      let files = data[0];
-      files.forEach((file) => {
-        console.log(file.name);
-      });
-    })
-    .catch((ex) => console.log(ex));
-};
+// Multerを使ってファイル名を書き換える
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 
 // ファイル取得
-
 type UserId = { userId?: string };
 type TId = { tId?: string };
 
@@ -48,13 +35,17 @@ const googleCloudStorageReadFile = async (prefix: ReadFile) => {
   const userId = prefix.userId;
 
   if (tId) {
-    const file = await bucket.getFiles({ prefix: `tatoe/${tId}/` });
-    console.log(file[0]);
+    // const file = await googleStorage.bucket(bucketName as string).getFiles({
+    //   prefix: `tatoe/${tId}/`,
+    // });
+    // console.log(file[0]);
   }
   // users/userId/userのアバター
   if (userId) {
-    const file = await bucket.getFiles({ prefix: `users/${userId}/` });
-    console.log(file[0]);
+    // const file = await googleStorage.bucket(bucketName as string).getFiles({
+    //   prefix: `users/${userId}/`,
+    // });
+    // console.log(file[0]);
   }
 };
 
@@ -64,38 +55,31 @@ type UploadFile = {
   destinationFilePath: string;
   fileName: string;
 };
-const googleCloudStorageUploadFile = async ({
-  // req,
-  destinationFilePath,
-  fileName,
-}: UploadFile) => {
+const googleCloudStorageUploadFile = async ({}: // req,
+// destinationFilePath,
+// fileName,
+UploadFile) => {
   // 例 filePath : 'dest/example.txt'
   // 例 fileName : 'example.txt'
-  await bucket.upload(fileName, { destination: destinationFilePath });
-  // try {
-  //   if (req.file) {
-  //     const blob = bucket.file(req.file.originalName);
-  //     const blobStream = blob.createWriteStream();
-  //     blobStream.on('finish', () => {
-  //       res.status(200).send('Success');
-  //       console.log('Success');
-  //     });
-  //     blobStream.end(req.file.buffer);
-  //   } else throw 'error with img';
-  // } catch (error) {
-  //   res.status(500).send(error);
-  // }
+  // await googleStorage.bucket(bucketName as string).upload(fileName, {
+  //   destination: destinationFilePath,
+  // });
 };
 
 // ファイル削除
 const googleCloudStorageDeleteFile = async (destinationFilePath: string) => {
   // 例 filePath : 'dest/example.txt'
-  await bucket.file(destinationFilePath).delete();
+  await googleStorage
+    .bucket(bucketName as string)
+    .file(destinationFilePath)
+    .delete();
 };
 
 export {
   googleCloudStorageUploadFile,
   googleCloudStorageReadFile,
   googleCloudStorageDeleteFile,
-  getGoogleCloudStorageInfo,
+  bucketName,
+  googleStorage,
+  upload,
 };
