@@ -6,6 +6,7 @@ import { prisma } from '../prisma';
 import { RequestUser } from '../@types/express';
 import UserTatoeRouter from '../route/UserTatoeRouter';
 import fs from 'fs/promises';
+import path from 'path';
 import { readFileSync, promises as fsPromises } from 'fs';
 import { upload, bucketName, googleStorage } from '../googleCloudStorage';
 
@@ -92,20 +93,17 @@ router.put(
 router.get(
   '/:id/profile_image',
   passport.authenticate('jwt', { session: false }),
-  // upload.single('image'),
-  // fetch(---, {body: {image: File }})
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id;
     const userId = (req.user as RequestUser)?.id;
-    const file = req.file;
 
     if (userId === id) {
-      if (file && bucketName) {
-        const main = async () => {
-          // GCSからの読み込み
-          await googleStorage
+      const main = async () => {
+        // GCSからの読み込み
+        try {
+          const gcsImage = await googleStorage
             .bucket(bucketName as string)
-            .getFiles({ prefix: '/' })
+            .getFiles()
             // .getFiles({ prefix: `/${userId}` }) // putで作成したディレクトリ名とuserId指定
             .then((res) => {
               console.log('Success');
@@ -113,14 +111,25 @@ router.get(
             .catch((err) => {
               console.error('ERROR:', err);
             });
-        };
-        main();
+
+          // なにもない
+          console.log(gcsImage);
+        } catch {
+          throw Error('画像を取得できませんでした');
+        }
+
         // フロントへ画像を送る
-        await fs.readFile('illust350.png').then((data) => {
+        await fs.readFile('filename.png').then((data) => {
           res.type('png');
           res.send(data);
         });
-      } else throw 'There are no file and bucketName';
+
+        //　ディレクトリを指定してファイルを送信する
+        // ただしgcsImageはstringじゃないのでエラー
+        // const filePath = path.join(__dirname, gcsImage);
+        // await res.sendFile(filePath);
+      };
+      main();
     } else throw 'Different user';
     res.json();
     next();
@@ -145,9 +154,13 @@ router.put(
       if (file && bucketName) {
         const main = async () => {
           try {
+            const fileName = file.path.substring(8, file.path.length);
             const data = await googleStorage
               .bucket(bucketName as string)
-              .upload(`${file.path}`, { gzip: true })
+              .upload(`${file.path}`, {
+                gzip: true,
+                destination: `${userId}/${fileName}`,
+              })
               .then((res) => {
                 // 公開状態にする場合
                 // res[0].makePublic();
@@ -172,7 +185,6 @@ router.put(
         next();
       }
     }
-    console.log('Different User');
   }
 );
 
