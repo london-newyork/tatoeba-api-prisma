@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 import { passport } from './passport';
 
 import express from 'express';
@@ -9,7 +10,10 @@ import { prisma } from '../src/prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
 import TatoeRouter from './route/TatoeRouter';
+import path from 'path';
+
 const app: express.Express = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,12 +28,6 @@ app.use(
 );
 app.use(passport.initialize());
 
-/**
- *
- * POST /users/:userId/tatoe -> ユーザーのたとえを作成する -> 他の人たとえを作成する /users/abc/tatoe
- * POST /tatoe -> たとえを作成する
- */
-
 // routerを追加
 app.use('/auth', AuthRouter);
 app.use('/users', UserRouter);
@@ -37,6 +35,9 @@ app.use('/tatoe', TatoeRouter);
 app.listen(3003, () => {
   console.log('Start on port 3003.');
 });
+
+// 画像登録で必要
+app.use(express.static(path.join(__dirname, 'uploads')));
 
 //仮登録時にユーザーがメールアドレスを登録する
 app.post(
