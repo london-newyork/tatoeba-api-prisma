@@ -12,7 +12,19 @@ router.get('/', async (req: express.Request, res: express.Response) => {
       createdAt: 'desc',
     },
   });
+
   res.json({ tatoe });
+});
+
+router.get('/:tId', async (req: express.Request, res: express.Response) => {
+  const tId = req.params.tId;
+
+  const tatoe = await prisma.tatoe.findUnique({
+    where: { id: tId },
+  });
+  console.log(tatoe);
+
+  res.json({ data: tatoe });
 });
 
 router.post(

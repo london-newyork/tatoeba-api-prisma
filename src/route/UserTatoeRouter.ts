@@ -8,17 +8,15 @@ const router = express.Router();
 // ユーザーの例え一覧取得
 // これで (/users)/:userId/tatoe　のはず
 router.get(
-  '/',
+  '/:userId/tatoe',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
     const id = req.params.userId;
     const userId = (req.user as RequestUser)?.id;
-
     if (userId === id) {
       const userTatoe = await prisma.tatoe.findMany({
         where: { userId: id },
       });
-      console.log('userTatoe :', userTatoe);
 
       res.json({ data: userTatoe });
     } else {

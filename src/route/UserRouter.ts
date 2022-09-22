@@ -13,7 +13,7 @@ import { upload, bucketName, googleStorage } from '../googleCloudStorage';
 const router = express.Router();
 
 // (/users)/:userId/tatoe/:tatoeId
-router.use('/:userId/tatoe', UserTatoeRouter);
+router.use('/', UserTatoeRouter);
 
 //一覧取得
 router.get(
