@@ -31,7 +31,6 @@ model Tatoe {
   id String @id @default(uuid())
   user User @relation(fields: [userId],references: [id])
   userId String
-  userName String @relation(fields: [userId],references: [userName])
   title String?
   shortParaphrase String?
   description String?

@@ -12,7 +12,6 @@ router.get('/', async (req: express.Request, res: express.Response) => {
       createdAt: 'desc',
     },
   });
-  console.log(tatoe);
 
   res.json({ tatoe });
 });
