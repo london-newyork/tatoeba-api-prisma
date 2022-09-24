@@ -38,7 +38,7 @@ Prismaを使ったマイグレーション、型安全を実現する
 
 ### 言語とツール等
 
-TypeScript/REST API(Open API)/Stoplight Studio/PlanetScale/Node.js/Express/Prisma/PostgreSQL/Cloud Storage for Firebase
+TypeScript/REST API(Open API)/Stoplight Studio/PlanetScale/Node.js/Express/Prisma/PostgreSQL/Google Cloud Storage(GCS)
 
 # 開発背景
 
