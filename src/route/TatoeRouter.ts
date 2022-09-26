@@ -3,6 +3,11 @@ import passport from 'passport';
 import { RequestUser } from '../@types/express';
 import { prisma } from '../prisma';
 import { DateFormat, dateFormat, formatDate, FormattedDate } from '../date';
+
+import { createReadStream } from 'fs';
+import { unlink } from 'fs/promises';
+import path from 'path';
+import { upload, bucketName, googleStorage } from '../googleCloudStorage';
 const router = express.Router();
 
 router.get('/', async (req: express.Request, res: express.Response) => {
@@ -96,6 +101,67 @@ router.delete(
       } catch {
         throw Error('削除できませんでした');
       }
+    }
+  }
+);
+
+// 説明画像
+router.get(
+  '/:id/explanation_image',
+  async (req: express.Request, res: express.Response, next) => {
+    const id = req.params.id; // tId
+    const userId = (req.user as RequestUser)?.id;
+    const file = googleStorage
+      .bucket(bucketName as string)
+      .file(`tatoe_images/${userId}/${id}`);
+
+    const [exists] = await file.exists();
+
+    if (exists) {
+      const stream = file.createReadStream();
+      stream.on('error', (error) => {
+        console.log(`${error}`);
+        res.statusCode = 500;
+        res.end('500 error');
+      });
+      stream.pipe(res);
+    }
+    // デフォルト画像はフロント側CSSで用意されているのでいらない
+  }
+);
+
+router.put(
+  '/:id/explanation_image',
+  passport.authenticate('jwt', { session: false }),
+  upload.single('image'),
+  async (req: express.Request, res: express.Response, next) => {
+    const id = req.params.id; // tId
+    const userId = (req.user as RequestUser)?.id;
+    const file = req.file;
+    console.log('======ID', id);
+    console.log('======USER ID', userId);
+    console.log('===EXPLANATION IMAGE', file);
+
+    // バケットのパスにuserIdいれたほうがいいか検討中
+    // uploadsというディレクトリにフロントから画像が来るが、userIdも同じディレクトリになっているので、大丈夫か
+    if (file && bucketName) {
+      try {
+        const data = await googleStorage
+          .bucket(bucketName as string)
+          .upload(`${file.path}`, {
+            gzip: true,
+            destination: `tatoe_images/${userId}/${id}`,
+          });
+
+        res.json({ data });
+        console.log('data', data);
+      } finally {
+        await unlink(file.path);
+        console.log('File has been deleted');
+      }
+    } else {
+      console.log('There are no file and bucketName');
+      next();
     }
   }
 );
