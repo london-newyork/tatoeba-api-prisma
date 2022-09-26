@@ -176,13 +176,12 @@ router.delete(
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
     const userId = (req.user as RequestUser)?.id;
-    const file = req.file;
-    console.log('======ID', id);
-    console.log('======USER ID', userId);
-    console.log('===EXPLANATION IMAGE', file);
+
+    console.log('======DELETE ID', id);
+    console.log('======DELETE USER ID', userId);
 
     // TODO ここに削除処理をかく
-    if (file && bucketName) {
+    if (bucketName) {
       const file = googleStorage
         .bucket(bucketName as string)
         .file(`tatoe_images/${id}`);
@@ -190,14 +189,15 @@ router.delete(
       const [exists] = await file.exists();
 
       if (exists) {
-        const stream = file.createReadStream();
-        stream.on('error', (error) => {
-          console.log(`${error}`);
-          res.statusCode = 500;
-          res.end('500 error');
-        });
-        stream.pipe(res);
+        // TODO フロント側の画像を削除したい
+        await file.delete().then(() => {});
+        console.log('File on GCS has been deleted');
+      } else {
+        throw Error('データを取得できませんでした。');
       }
+    } else {
+      res.statusCode = 500;
+      res.end('500 error');
     }
   }
 );
