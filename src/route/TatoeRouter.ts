@@ -111,12 +111,15 @@ router.get(
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
     const userId = (req.user as RequestUser)?.id;
+    console.log('====GET tId???', id);
+    console.log('====GET USER ID???', userId); // false
     const file = googleStorage
       .bucket(bucketName as string)
-      .file(`tatoe_images/${userId}/${id}`);
+      .file(`tatoe_images/${id}`);
 
     const [exists] = await file.exists();
 
+    console.log('====GET EXISTS??', exists); // false
     if (exists) {
       const stream = file.createReadStream();
       stream.on('error', (error) => {
@@ -138,8 +141,8 @@ router.put(
     const id = req.params.id; // tId
     const userId = (req.user as RequestUser)?.id;
     const file = req.file;
-    console.log('======ID', id);
-    console.log('======USER ID', userId);
+    console.log('======PUT tId', id);
+    console.log('======PUT USER ID', userId);
     console.log('===EXPLANATION IMAGE', file);
 
     // バケットのパスにuserIdいれたほうがいいか検討中
@@ -150,7 +153,7 @@ router.put(
           .bucket(bucketName as string)
           .upload(`${file.path}`, {
             gzip: true,
-            destination: `tatoe_images/${userId}/${id}`,
+            destination: `tatoe_images/${id}`,
           });
 
         res.json({ data });
@@ -162,6 +165,39 @@ router.put(
     } else {
       console.log('There are no file and bucketName');
       next();
+    }
+  }
+);
+
+router.delete(
+  '/:id/explanation_image',
+  passport.authenticate('jwt', { session: false }),
+  upload.single('image'),
+  async (req: express.Request, res: express.Response, next) => {
+    const id = req.params.id; // tId
+    const userId = (req.user as RequestUser)?.id;
+    const file = req.file;
+    console.log('======ID', id);
+    console.log('======USER ID', userId);
+    console.log('===EXPLANATION IMAGE', file);
+
+    // TODO ここに削除処理をかく
+    if (file && bucketName) {
+      const file = googleStorage
+        .bucket(bucketName as string)
+        .file(`tatoe_images/${id}`);
+
+      const [exists] = await file.exists();
+
+      if (exists) {
+        const stream = file.createReadStream();
+        stream.on('error', (error) => {
+          console.log(`${error}`);
+          res.statusCode = 500;
+          res.end('500 error');
+        });
+        stream.pipe(res);
+      }
     }
   }
 );
