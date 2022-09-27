@@ -194,12 +194,24 @@ router.delete(
   upload.single('image'),
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
-    const userId = (req.user as RequestUser)?.id;
 
     console.log('======DELETE ID', id);
-    console.log('======DELETE USER ID', userId);
 
-    // TODO ここに削除処理をかく
+    // TODO imageUrlカラムから削除して、DBの例えからも削除されるようにする
+    if (id) {
+      try {
+        const tatoe = await prisma.tatoe.delete({
+          where: { id },
+          select: {
+            imageUrl: true,
+          },
+        });
+        res.json({ data: tatoe });
+      } catch {
+        throw Error('削除できませんでした');
+      }
+    }
+
     if (bucketName) {
       const file = googleStorage
         .bucket(bucketName as string)
