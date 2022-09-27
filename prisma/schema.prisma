@@ -18,9 +18,9 @@ model Registration {
 }
 
 model User {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @relation("id")
   email String @unique
-  userName String?
+  userName String? @relation("userName")
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
@@ -29,7 +29,9 @@ model User {
 
 model Tatoe {
   id String @id @default(uuid())
-  user User @relation(fields: [userId],references: [id])
+  user User @relation("id",fields: [userId],references: [id])
+  userNameRelated User @relation("userName",fields: [userName],references: [userName])
+  userName String
   userId String
   imageUrl String?
   title String?

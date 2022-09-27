@@ -13,6 +13,14 @@ router.get('/', async (req: express.Request, res: express.Response) => {
     orderBy: {
       createdAt: 'desc',
     },
+    include: {
+      user: {
+        select: {
+          userName: true,
+          id: true,
+        },
+      },
+    },
   });
 
   res.json({ tatoe });
