@@ -41,18 +41,30 @@ router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
   upload.single('image'),
-  async (req: express.Request, res: express.Response) => {
+  async (req: express.Request, res: express.Response, next) => {
     const userId = (req.user as RequestUser)?.id;
-    const { tId, title, shortParaphrase, description } = req.body;
+    const { title, shortParaphrase, description } = req.body;
     const file = req.file;
 
+    // TODO 作成したimageUrlカラムにもURLを格納したい
+    const tatoe = await prisma.tatoe.create({
+      data: {
+        userId,
+        title,
+        shortParaphrase,
+        description,
+        // imageUrl
+      },
+    });
+    res.json({ data: tatoe });
+    // TODO Error: Cannot set headers after they are sent to the clientを解決したい
     if (file && bucketName) {
       try {
         const data = await googleStorage
           .bucket(bucketName as string)
           .upload(`${file.path}`, {
             gzip: true,
-            destination: `tatoe_images/${tId}`,
+            destination: `tatoe_images/${tatoe.id}`,
           });
 
         res.json({ data });
@@ -60,23 +72,15 @@ router.post(
       } finally {
         await unlink(file.path);
         console.log('File has been deleted');
+        next();
+        res.end();
       }
     } else {
       console.log('There are no file and bucketName');
     }
-    // TODO 作成したimageUrlカラムにもURLを格納したい
-    const tatoe = await prisma.tatoe.create({
-      data: {
-        userId,
-        id: tId,
-        title,
-        shortParaphrase,
-        description,
-      },
-    });
+
     // const createdAt = tatoe.createdAt;
     // const formattedCreatedAt = formatDate(createdAt, dateFormat);
-    res.json({ data: tatoe });
   }
 );
 
@@ -131,6 +135,7 @@ router.delete(
   }
 );
 
+// 使わない可能性あるため一旦コメントアウト
 // // 説明画像
 // router.get(
 //   '/:id/explanation_image',

@@ -20,7 +20,7 @@ model Registration {
 model User {
   id String @id @default(uuid())
   email String @unique
-  userName String? 
+  userName String?
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
