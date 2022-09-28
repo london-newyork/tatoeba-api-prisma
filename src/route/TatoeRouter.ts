@@ -45,6 +45,8 @@ router.post(
     const userId = (req.user as RequestUser)?.id;
     const { title, shortParaphrase, description } = req.body;
     const file = req.file;
+    console.log('==== POST file', file);
+    console.log('==== POST req.body', req.body);
 
     // TODO 作成したimageUrlカラムにもURLを格納したい
     const tatoe = await prisma.tatoe.create({
@@ -66,7 +68,7 @@ router.post(
             gzip: true,
             destination: `tatoe_images/${tatoe.id}`,
           });
-
+        console.log('==== POST storage data', data);
         res.json({ data });
         console.log('data', data);
       } finally {
@@ -135,34 +137,34 @@ router.delete(
   }
 );
 
-// 使わない可能性あるため一旦コメントアウト
-// // 説明画像
-// router.get(
-//   '/:id/explanation_image',
-//   async (req: express.Request, res: express.Response, next) => {
-//     const id = req.params.id; // tId
-//     const userId = (req.user as RequestUser)?.id;
-//     console.log('====GET tId???', id);
-//     console.log('====GET USER ID???', userId); // false
-//     const file = googleStorage
-//       .bucket(bucketName as string)
-//       .file(`tatoe_images/${id}`);
+// 説明画像
+// フロント更新時に例え登録ページであらかじめ表示されている必要がある
+router.get(
+  '/:id/explanation_image',
+  async (req: express.Request, res: express.Response, next) => {
+    const id = req.params.id; // tId
+    // const userId = (req.user as RequestUser)?.id;
+    console.log('====GET tId???', id); // ある
+    // console.log('====GET USER ID???', userId); // false
+    const file = googleStorage
+      .bucket(bucketName as string)
+      .file(`tatoe_images/${id}`);
 
-//     const [exists] = await file.exists();
+    const [exists] = await file.exists();
 
-//     console.log('====GET EXISTS??', exists); // false
-//     if (exists) {
-//       const stream = file.createReadStream();
-//       stream.on('error', (error) => {
-//         console.log(`${error}`);
-//         res.statusCode = 500;
-//         res.end('500 error');
-//       });
-//       stream.pipe(res);
-//     }
-//     // デフォルト画像はフロント側CSSで用意されているのでいらない
-//   }
-// );
+    console.log('====GET EXISTS??', exists); // true
+    if (exists) {
+      const stream = file.createReadStream();
+      stream.on('error', (error) => {
+        console.log(`${error}`);
+        res.statusCode = 500;
+        res.end('500 error');
+      });
+      stream.pipe(res);
+    }
+    // デフォルト画像はフロント側CSSで用意されているのでいらない
+  }
+);
 
 // router.put(
 //   '/:id/explanation_image',
