@@ -5,6 +5,8 @@ import { prisma } from '../prisma';
 import { DateFormat, dateFormat, formatDate, FormattedDate } from '../date';
 import { unlink } from 'fs/promises';
 import { upload, bucketName, googleStorage } from '../googleCloudStorage';
+import { readFile } from 'fs';
+
 const router = express.Router();
 
 router.get('/', async (req: express.Request, res: express.Response) => {
@@ -143,9 +145,7 @@ router.get(
   '/:id/explanation_image',
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
-    // const userId = (req.user as RequestUser)?.id;
     console.log('====GET tId???', id); // ある
-    // console.log('====GET USER ID???', userId); // false
     const file = googleStorage
       .bucket(bucketName as string)
       .file(`tatoe_images/${id}`);
@@ -160,14 +160,8 @@ router.get(
         res.statusCode = 500;
         res.end('500 error');
       });
-      const dataImage = stream.pipe(res);
-      // const image = data.contentType('png');
-      const image = dataImage.header({ 'Content-Type': 'image/png' });
-      res.send(image);
-      res.end();
-      // res.send({ data });
+      stream.pipe(res.header({ 'Content-Type': 'image/png' }));
     }
-    // デフォルト画像はフロント側CSSで用意されているのでいらない
   }
 );
 
