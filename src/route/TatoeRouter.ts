@@ -6,6 +6,7 @@ import { DateFormat, dateFormat, formatDate, FormattedDate } from '../date';
 import { unlink } from 'fs/promises';
 import { upload, bucketName, googleStorage } from '../googleCloudStorage';
 import { readFile } from 'fs';
+import { send } from 'process';
 
 const router = express.Router();
 
@@ -145,14 +146,12 @@ router.get(
   '/:id/explanation_image',
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
-    console.log('====GET tId???', id); // ある
     const file = googleStorage
       .bucket(bucketName as string)
       .file(`tatoe_images/${id}`);
 
     const [exists] = await file.exists();
 
-    console.log('====GET EXISTS??', exists); // true
     if (exists) {
       const stream = file.createReadStream();
       stream.on('error', (error) => {
