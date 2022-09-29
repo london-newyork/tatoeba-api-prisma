@@ -160,7 +160,12 @@ router.get(
         res.statusCode = 500;
         res.end('500 error');
       });
-      stream.pipe(res);
+      const dataImage = stream.pipe(res);
+      // const image = data.contentType('png');
+      const image = dataImage.header({ 'Content-Type': 'image/png' });
+      res.send(image);
+      res.end();
+      // res.send({ data });
     }
     // デフォルト画像はフロント側CSSで用意されているのでいらない
   }
