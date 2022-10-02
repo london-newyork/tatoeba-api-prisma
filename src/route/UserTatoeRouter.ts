@@ -6,19 +6,42 @@ import { prisma } from '../prisma';
 const router = express.Router();
 
 // ユーザーの例え一覧取得
-// これで (/users)/:userId/tatoe　のはず
 router.get(
   '/:userId/tatoe',
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
     const id = req.params.userId;
     const userId = (req.user as RequestUser)?.id;
+
     if (userId === id) {
       const userTatoe = await prisma.tatoe.findMany({
         where: { userId: id },
       });
 
-      res.json({ data: userTatoe });
+      const newUserTatoe = userTatoe.map((prevTatoe) => {
+        const id = prevTatoe.id;
+        const userId = prevTatoe.userId;
+        const imageId = prevTatoe.imageId;
+        const title = prevTatoe.title;
+        const shortParaphrase = prevTatoe.shortParaphrase;
+        const description = prevTatoe.description;
+        const createdAt = prevTatoe.createdAt;
+        const updatedAt = prevTatoe.updatedAt;
+        const imageUrl = `${process.env.BACKEND_URL}tatoe/${prevTatoe.id}/explanation_image/${prevTatoe.imageId}`;
+        return {
+          id,
+          userId,
+          imageId,
+          title,
+          shortParaphrase,
+          description,
+          createdAt,
+          updatedAt,
+          imageUrl,
+        };
+      });
+
+      res.json({ data: newUserTatoe });
     } else {
       res.json({ data: [] });
     }
