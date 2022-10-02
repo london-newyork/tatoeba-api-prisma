@@ -81,11 +81,6 @@ router.post(
     } else {
       console.log('There are no file or bucketName');
     }
-    // TODO あとで消すかもしれない
-    // return {
-    //   ...tatoe,
-    //   imageUrl: `${process.env.BACKEND_URL}/tatoe/${tatoe.id}/explanation_image/${imageId}`,
-    // };
 
     const newTatoe = {
       ...tatoe,
@@ -108,38 +103,39 @@ router.put(
   async (req: express.Request, res: express.Response) => {
     const userId = (req.user as RequestUser)?.id;
     const id = req.params.id;
-    // TODO imageIdをフロントからもらう
     const { title, shortParaphrase, description, imageId } = req.body;
     const file = req.file;
 
-    console.log(`${'\n\n'}=== PUT userId ===${'\n\n'}`, userId);
-    console.log(`${'\n\n'}=== PUT req.body ===${'\n\n'}`, req.body);
+    // console.log(`${'\n\n'}=== PUT userId ===${'\n\n'}`, userId); // ある
+    // console.log(`${'\n\n'}=== PUT file ===${'\n\n'}`, file); // ある
+    // console.log(`${'\n\n'}=== PUT req.body ===${'\n\n'}`, req.body); // ある
 
-    const recordedTatoeUserId = await prisma.tatoe.findUnique({
+    const prevTatoeData = await prisma.tatoe.findUnique({
       where: { id },
       select: {
         userId: true,
+        imageId: true,
       },
     });
-    // TODO userId 画像delete時にnullになってる
+    // TODO: userId 画像delete時にnullになってる
     console.log(
-      `${'\n\n'}=== PUT PRISMA userId ===${'\n\n'}`,
-      recordedTatoeUserId
+      // `${'\n\n'}=== PUT PRISMA userId ===${'\n\n'}`, //ある
+      prevTatoeData
     );
 
-    if (userId !== recordedTatoeUserId?.userId) {
+    if (userId !== prevTatoeData?.userId) {
       throw Error('例えを作成したユーザーではありません');
     }
 
     if (file && bucketName) {
+      console.log(prevTatoeData.imageId);
       try {
         await googleStorage
           .bucket(bucketName as string)
           .upload(`${file.path}`, {
             gzip: true,
-            destination: `tatoe_images/${id}`,
+            destination: `tatoe_images/${id}/${prevTatoeData.imageId}`,
           });
-        // console.log('==== PUT storage data', data);
       } catch {
         throw new Error('エラー');
       } finally {
@@ -209,11 +205,14 @@ router.get(
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
     const imageId = req.params.imageId;
+    console.log(`${'\n\n'}=== get imageId ===${'\n\n'}`, imageId);
+    console.log(`${'\n\n'}=== get tId ===${'\n\n'}`, id);
+
     const file = googleStorage
       .bucket(bucketName as string)
       .file(`tatoe_images/${id}/${imageId}`);
-
     const [exists] = await file.exists();
+    console.log(`${'\n\n'}=== get file exists ===${'\n\n'}`, exists);
 
     if (exists) {
       const stream = file.createReadStream();
