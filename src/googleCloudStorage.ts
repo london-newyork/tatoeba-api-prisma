@@ -21,4 +21,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+if (!bucketName) {
+  throw new Error('Bucket Name is not defined on process.env');
+}
+
 export { bucketName, googleStorage, upload };
