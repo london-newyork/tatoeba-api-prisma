@@ -27,7 +27,9 @@ router.get(
         const description = prevTatoe.description;
         const createdAt = prevTatoe.createdAt;
         const updatedAt = prevTatoe.updatedAt;
-        const imageUrl = `${process.env.BACKEND_URL}tatoe/${prevTatoe.id}/explanation_image/${prevTatoe.imageId}`;
+        const imageUrl = prevTatoe.imageId
+          ? `${process.env.BACKEND_URL}tatoe/${prevTatoe.id}/explanation_image/${prevTatoe.imageId}`
+          : null;
         return {
           id,
           userId,

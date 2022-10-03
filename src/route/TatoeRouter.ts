@@ -9,6 +9,7 @@ import { nanoid } from 'nanoid';
 
 const router = express.Router();
 
+// 全員の分
 router.get('/', async (req: express.Request, res: express.Response) => {
   const tatoe = await prisma.tatoe.findMany({
     take: 100,
@@ -28,19 +29,20 @@ router.get('/', async (req: express.Request, res: express.Response) => {
   res.json({ tatoe });
 });
 
+// Search Result
 router.get('/:tId', async (req: express.Request, res: express.Response) => {
   const tId = req.params.tId;
-  const { imageId } = req.body; // TODO imageIdをフロントからもらう
 
   const tatoe = await prisma.tatoe.findUnique({
     where: { id: tId },
   });
-  console.log(`${'\n\n'}===GET PRISMA TATOE @user===${'\n\n'}`, tatoe);
-  return {
+  const newTatoe = {
     ...tatoe,
-    imageUrl: `${process.env.BACKEND_URL}/tatoe/${tatoe?.id}/explanation_image/${imageId}`,
+    imageUrl: tatoe?.imageId
+      ? `${process.env.BACKEND_URL}tatoe/${tatoe?.id}/explanation_image/${tatoe.imageId}`
+      : null,
   };
-  res.json({ data: tatoe });
+  res.json({ data: newTatoe });
 });
 
 router.post(
@@ -52,10 +54,8 @@ router.post(
     const { title, shortParaphrase, description } = req.body;
     const file = req.file;
     console.log('==== POST file', file);
-    // console.log(`${'\n\n'}=== POST userId ===${'\n\n'}`, userId);
-    // console.log('==== POST req.body', req.body);
 
-    const imageId = nanoid();
+    const imageId = file ? nanoid() : null;
     const tatoe = await prisma.tatoe.create({
       data: {
         userId,
@@ -76,7 +76,7 @@ router.post(
           });
       } finally {
         await unlink(file.path);
-        console.log('File has been deleted');
+        console.log('File on dir uploads has been deleted');
       }
     } else {
       console.log('There are no file or bucketName');
@@ -84,11 +84,11 @@ router.post(
 
     const newTatoe = {
       ...tatoe,
-      imageUrl: `${process.env.BACKEND_URL}tatoe/${tatoe.id}/explanation_image/${imageId}`,
+      imageUrl: imageId
+        ? `${process.env.BACKEND_URL}tatoe/${tatoe.id}/explanation_image/${imageId}`
+        : null,
     };
     res.json({ data: newTatoe });
-
-    // res.json({ data: tatoe });
 
     // const createdAt = tatoe.createdAt;
     // const formattedCreatedAt = formatDate(createdAt, dateFormat);
@@ -103,12 +103,10 @@ router.put(
   async (req: express.Request, res: express.Response) => {
     const userId = (req.user as RequestUser)?.id;
     const id = req.params.id;
-    const { title, shortParaphrase, description, imageId } = req.body;
+    const { title, shortParaphrase, description } = req.body;
     const file = req.file;
-
-    // console.log(`${'\n\n'}=== PUT userId ===${'\n\n'}`, userId); // ある
-    // console.log(`${'\n\n'}=== PUT file ===${'\n\n'}`, file); // ある
-    // console.log(`${'\n\n'}=== PUT req.body ===${'\n\n'}`, req.body); // ある
+    console.log(`${'\n\n'}=== PUT :id(tId) ===${'\n\n'}`, id);
+    console.log(`${'\n\n'}=== PUT userId ===${'\n\n'}`, userId);
 
     const prevTatoeData = await prisma.tatoe.findUnique({
       where: { id },
@@ -117,32 +115,31 @@ router.put(
         imageId: true,
       },
     });
-    // TODO: userId 画像delete時にnullになってる
-    console.log(
-      // `${'\n\n'}=== PUT PRISMA userId ===${'\n\n'}`, //ある
-      prevTatoeData
-    );
 
     if (userId !== prevTatoeData?.userId) {
       throw Error('例えを作成したユーザーではありません');
     }
+    if (!file) {
+      console.log('画像データがないため画像のみ更新されません。');
+    }
 
-    if (file && bucketName) {
-      console.log(prevTatoeData.imageId);
+    let newImageId = prevTatoeData.imageId;
+    if (file) {
       try {
+        newImageId = nanoid();
         await googleStorage
           .bucket(bucketName as string)
           .upload(`${file.path}`, {
             gzip: true,
-            destination: `tatoe_images/${id}/${prevTatoeData.imageId}`,
+            destination: `tatoe_images/${id}/${newImageId}`,
           });
       } catch {
         throw new Error('エラー');
       } finally {
         await unlink(file.path);
-        console.log('File has been deleted');
+        console.log('File on dir uploads has been deleted');
       }
-    } else {
+    } else if (prevTatoeData.imageId) {
       console.log('There are no file or bucketName');
     }
 
@@ -154,17 +151,19 @@ router.put(
           title,
           shortParaphrase,
           description,
+          imageId: newImageId,
         },
       });
+      const newTatoe = {
+        ...tatoe,
+        imageUrl: tatoe.imageId
+          ? `${process.env.BACKEND_URL}tatoe/${tatoe.id}/explanation_image/${tatoe.imageId}`
+          : null,
+      };
+      res.json({ data: newTatoe });
 
-      // return {
-      //   ...tatoe,
-      //   imageUrl: `${process.env.BACKEND_URL}/tatoe/${tatoe.id}/explanation_image/${imageId}`,
-      // };
       // const createdAt = tatoe.createdAt;
       // const formattedCreatedAt = formatDate(createdAt, dateFormat);
-
-      res.json({ data: tatoe });
     } catch {
       throw Error('更新できませんでした');
     }
@@ -176,20 +175,14 @@ router.delete(
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
-    const { tId, imageId } = req.body;
+    const { tId } = req.body;
     if (tId === id) {
       try {
         const tatoe = await prisma.tatoe.delete({
           where: { id },
         });
-        console.log(
-          `${'\n\n'}=== DELETE TATOE (imageじゃなく例え一件)===${'\n\n'}`,
-          tatoe
-        );
-        // return {
-        //   ...tatoe,
-        //   imageUrl: `${process.env.BACKEND_URL}/tatoe/${tatoe.id}/explanation_image/${imageId}`,
-        // };
+        console.log(`${'\n\n'}=== DELETE ALL TATOE ===${'\n\n'}`, tatoe);
+
         res.json({ data: tatoe });
       } catch {
         throw Error('削除できませんでした');
@@ -198,77 +191,82 @@ router.delete(
   }
 );
 
-// TODO 2回目のPUTだと画像の表示スピード遅い net::ERR_NETWORK_IO_SUSPENDED
 // 説明画像
 router.get(
   '/:id/explanation_image/:imageId',
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
     const imageId = req.params.imageId;
-    console.log(`${'\n\n'}=== get imageId ===${'\n\n'}`, imageId);
-    console.log(`${'\n\n'}=== get tId ===${'\n\n'}`, id);
+    console.log(`${'\n\n'}=== GET imageId ===${'\n\n'}`, imageId);
+    console.log(`${'\n\n'}=== GET tId ===${'\n\n'}`, id);
 
     const file = googleStorage
       .bucket(bucketName as string)
       .file(`tatoe_images/${id}/${imageId}`);
     const [exists] = await file.exists();
-    console.log(`${'\n\n'}=== get file exists ===${'\n\n'}`, exists);
+    console.log(`${'\n\n'}=== GET file exists ===${'\n\n'}`, exists);
 
-    if (exists) {
-      const stream = file.createReadStream();
-      stream.on('error', (error) => {
-        console.log(`${error}`);
-        res.statusCode = 500;
-        res.end('500 error');
-      });
-      stream.pipe(res.header({ 'Content-Type': 'image/jpg' }));
+    try {
+      if (exists) {
+        const stream = file.createReadStream();
+        stream.on('error', (error) => {
+          console.log(`GET Error ${error}`);
+          res.statusCode = 500;
+          res.end('500 error');
+        });
+        stream.pipe(res.header({ 'Content-Type': 'image/jpg' }));
+      }
+      throw Error('画像がありません。');
+    } catch (error) {
+      console.error('GET IMAGE CATCH ERROR', error);
     }
   }
 );
 
-// TODO tatoeに登録した説明画像を取り出すためパスを変更する必要がある
-// TODO 画像Deleteした状態でPUT(更新)すると、Error: Channel closedになる
 router.delete(
   '/:id/explanation_image',
   passport.authenticate('jwt', { session: false }),
-  upload.single('image'),
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
+    const imageId = req.params.imageId;
+    const userId = (req.user as any).id;
 
     console.log('======DELETE tId', id);
+    console.log('======DELETE imageId', imageId);
 
-    // TODO imageUrlカラムから削除して、DBの例えからも削除されるようにする
-    if (id) {
-      try {
-        const tatoe = await prisma.tatoe.delete({
-          where: { id },
-          select: {
-            imageId: true,
-          },
-        });
-        res.json({ data: tatoe });
-      } catch {
-        throw Error('削除できませんでした');
-      }
+    const prevTatoe = await prisma.tatoe.findUnique({
+      where: { id },
+    });
+    if (!prevTatoe) {
+      throw new Error('Tatoe not Found');
+    }
+    if (prevTatoe.userId !== userId) {
+      throw new Error('本人以外画像を削除できません');
     }
 
-    if (bucketName) {
-      const file = googleStorage
-        .bucket(bucketName as string)
-        .file(`tatoe_images/${id}`);
+    const file = googleStorage
+      .bucket(bucketName as string)
+      .file(`tatoe_images/${id}/${prevTatoe.imageId}`);
 
-      const [exists] = await file.exists();
+    const [exists] = await file.exists();
 
-      if (exists) {
-        await file.delete().then(() => {});
-        console.log('File on GCS has been deleted');
-      } else {
-        throw Error('データを取得できませんでした。');
-      }
-    } else {
-      res.statusCode = 500;
-      res.end('500 error');
+    if (exists) {
+      await file.delete();
+      console.log('File on GCS has been deleted');
     }
+
+    const nextTatoe = await prisma.tatoe.update({
+      where: { id },
+      data: {
+        imageId: null,
+      },
+    });
+    res.json({
+      data: {
+        ...nextTatoe,
+        imageUrl: null,
+      },
+    });
   }
 );
 
