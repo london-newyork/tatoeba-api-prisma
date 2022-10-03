@@ -33,6 +33,7 @@ model Tatoe {
   userNameRelated User @relation("userName",fields: [userName],references: [userName])
   userName String
   userId String
+  imageId String?
   title String?
   shortParaphrase String?
   description String?
