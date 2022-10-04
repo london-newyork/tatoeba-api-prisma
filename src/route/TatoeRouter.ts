@@ -108,7 +108,7 @@ router.put(
     console.log(`${'\n\n'}=== PUT :id(tId) ===${'\n\n'}`, id);
     console.log(`${'\n\n'}=== PUT userId ===${'\n\n'}`, userId);
 
-    const prevTatoeData = await prisma.tatoe.findUnique({
+    const prevTatoe = await prisma.tatoe.findUnique({
       where: { id },
       select: {
         userId: true,
@@ -116,14 +116,14 @@ router.put(
       },
     });
 
-    if (userId !== prevTatoeData?.userId) {
+    if (userId !== prevTatoe?.userId) {
       throw Error('例えを作成したユーザーではありません');
     }
     if (!file) {
-      console.log('画像データがないため画像のみ更新されません。');
+      console.log('画像データがないため画像は更新されません。');
     }
 
-    let newImageId = prevTatoeData.imageId;
+    let newImageId = prevTatoe.imageId;
     if (file) {
       try {
         newImageId = nanoid();
@@ -139,7 +139,7 @@ router.put(
         await unlink(file.path);
         console.log('File on dir uploads has been deleted');
       }
-    } else if (prevTatoeData.imageId) {
+    } else if (prevTatoe.imageId) {
       console.log('There are no file or bucketName');
     }
 
@@ -215,8 +215,7 @@ router.get(
           res.end('500 error');
         });
         stream.pipe(res.header({ 'Content-Type': 'image/jpg' }));
-      }
-      throw Error('画像がありません。');
+      } else throw Error('画像がありません。');
     } catch (error) {
       console.error('GET IMAGE CATCH ERROR', error);
     }
@@ -228,11 +227,8 @@ router.delete(
   passport.authenticate('jwt', { session: false }),
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id; // tId
-    const imageId = req.params.imageId;
     const userId = (req.user as any).id;
-
-    console.log('======DELETE tId', id);
-    console.log('======DELETE imageId', imageId);
+    console.log('======DELETE tId', id); // undefined
 
     const prevTatoe = await prisma.tatoe.findUnique({
       where: { id },
@@ -255,7 +251,7 @@ router.delete(
       console.log('File on GCS has been deleted');
     }
 
-    const nextTatoe = await prisma.tatoe.update({
+    const fixedTatoe = await prisma.tatoe.update({
       where: { id },
       data: {
         imageId: null,
@@ -263,7 +259,7 @@ router.delete(
     });
     res.json({
       data: {
-        ...nextTatoe,
+        ...fixedTatoe,
         imageUrl: null,
       },
     });
