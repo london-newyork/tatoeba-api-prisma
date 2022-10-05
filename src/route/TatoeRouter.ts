@@ -25,7 +25,6 @@ router.get('/', async (req: express.Request, res: express.Response) => {
       },
     },
   });
-  console.log(tatoe);
 
   const newUserTatoe = tatoe.map((item) => {
     return {
