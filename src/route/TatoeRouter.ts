@@ -25,8 +25,26 @@ router.get('/', async (req: express.Request, res: express.Response) => {
       },
     },
   });
+  console.log(tatoe);
 
-  res.json({ tatoe });
+  const newUserTatoe = tatoe.map((item) => {
+    return {
+      id: item.id,
+      userId: item.userId,
+      imageId: item.imageId,
+      title: item.title,
+      shortParaphrase: item.shortParaphrase,
+      description: item.description,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      user: { userName: item.user.userName, id: item.user.id },
+      imageUrl: item.imageId
+        ? `${process.env.BACKEND_URL}tatoe/${item.id}/explanation_image/${item.imageId}`
+        : null,
+    };
+  });
+
+  res.json({ data: newUserTatoe });
 });
 
 // Search Result
