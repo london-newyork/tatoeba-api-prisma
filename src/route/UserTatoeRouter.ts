@@ -12,6 +12,7 @@ router.get(
   async (req: express.Request, res: express.Response) => {
     const id = req.params.userId;
     const userId = (req.user as RequestUser)?.id;
+    console.log('@UserRouter GET userId', id);
 
     if (userId === id) {
       const userTatoe = await prisma.tatoe.findMany({
