@@ -42,7 +42,7 @@ Prismaを使ったマイグレーション、型安全を実現する
 - REST API(Open API) / Stoplight Studio 
 - 言語: Node.js / Express / TypeScript
 - ORM: Prisma 
-- DB: PostgreSQL(途中まで) / MySQL2(PlanetScaleへ移行したため) / PlanetScale
+- DB: PostgreSQL(中盤のみ) / MySQL2(初期と中盤~PlanetScaleへ移行したため) / PlanetScale
 - ストレージ: Google Cloud Storage(GCS)
 - デプロイ: GCP / Cloud Run / Python3(G Cloud CLI用)
 ```
