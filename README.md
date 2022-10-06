@@ -38,7 +38,14 @@ Prismaを使ったマイグレーション、型安全を実現する
 
 ### 言語とツール等
 
-TypeScript / REST API(Open API) / Stoplight Studio / PlanetScale / Node.js / Express / Prisma / Google Cloud Storage(GCS) / PostgreSQL(途中まで) / MySQL2(PlanetScaleへ移行したため) / PlanetScale / GCP / Cloud Run / Python3(G Cloud CLI用)
+```
+- REST API(Open API) / Stoplight Studio 
+- 言語: Node.js / Express / TypeScript
+- ORM: Prisma 
+- DB: PostgreSQL(途中まで) / MySQL2(PlanetScaleへ移行したため) / PlanetScale
+- ストレージ: Google Cloud Storage(GCS)
+- デプロイ: GCP / Cloud Run / Python3(G Cloud CLI用)
+```
 
 # 開発背景
 
