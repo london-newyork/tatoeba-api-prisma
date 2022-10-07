@@ -6,7 +6,7 @@ import express from 'express';
 import { sendRegistrationAuthEmail } from './mailSender';
 
 import { validate } from 'email-validator';
-import { prisma } from '../src/prisma';
+import { prisma } from './prisma';
 import AuthRouter from './route/AuthRouter';
 import UserRouter from './route/UserRouter';
 import TatoeRouter from './route/TatoeRouter';
