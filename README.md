@@ -44,7 +44,7 @@ Prismaを使ったマイグレーション、型安全を実現する
 - ORM: Prisma 
 - DB: PostgreSQL(中盤のみ) / MySQL2(初期と中盤~再度PlanetScaleへ移行したため) / PlanetScale
 - ストレージ: Google Cloud Storage(GCS)
-- デプロイ: GCP / Cloud Run / Artifact Registry / Python3(G Cloud CLI用)
+- デプロイ: Docker / GCP / Cloud Run / Artifact Registry / Python3(G Cloud CLI用)
 
 
 # 開発背景
