@@ -79,6 +79,7 @@ router.post(
     const password = await bcrypt.hash(rawPassword, 10);
 
     // フロントから渡ってきたパスワードとトークンをDBへ登録する
+
     await prisma.$transaction(async (p) => {
       const registration = await p.registration.findUnique({
         where: { token },
