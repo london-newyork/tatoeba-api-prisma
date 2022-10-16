@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { prisma } from '../src/prisma';
+import { prisma } from './prisma';
 import { Strategy as StrategyLocal } from 'passport-local';
 import { ExtractJwt, Strategy as StrategyJWT } from 'passport-jwt';
 
