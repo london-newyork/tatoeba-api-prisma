@@ -76,7 +76,7 @@ app.get(
       throw new Error('Error: 存在しないTokenです');
     }
     await res.redirect(
-      `${process.env.FRONTEND_TOP_URL}RegisterMember/CompleteRegisterMemberForm/?token=${token}`
+      `${process.env.FRONTEND_TOP_URL}register-member/complete-register-member-form/?token=${token}`
     );
   }
 );
