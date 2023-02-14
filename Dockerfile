@@ -1,5 +1,5 @@
 FROM nikolaik/python-nodejs:python3.7-nodejs18-slim
-
+RUN apt-get update && apt-get install -y ca-certificates
 WORKDIR /app
 
 ADD package-lock.json package.json ./

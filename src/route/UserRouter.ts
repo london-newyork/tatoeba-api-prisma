@@ -93,6 +93,7 @@ router.get(
   '/:id/profile_image',
   async (req: express.Request, res: express.Response, next) => {
     const id = req.params.id;
+    console.log('アバター読み込み id', id);
 
     const file = googleStorage
       .bucket(bucketName as string)
